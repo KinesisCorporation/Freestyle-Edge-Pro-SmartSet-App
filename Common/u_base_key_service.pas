@@ -2052,12 +2052,15 @@ begin
           if (aMacro.Count <= 0) then
             continue;
 
+          //Add layer prefix if there
+          lineText := lineText + layerPrefix;
+
           //Add the co-triggers first
           if (aMacro.CoTrigger1 <> nil) then
-            lineText := '{' + aMacro.CoTrigger1.SaveValue + '}';
+            lineText := lineText + '{' + aMacro.CoTrigger1.SaveValue + '}';
 
           //Add the modified key
-          lineText := lineText + layerPrefix + '{' + aKbKey.OriginalKey.SaveValue + '}';
+          lineText := lineText + '{' + aKbKey.OriginalKey.SaveValue + '}';
 
           //Add the character separating config and value keys
           lineText := lineText + '>';
