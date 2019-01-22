@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <CONFIG>
   <ProjectOptions>
-    <Version Value="9"/>
+    <Version Value="10"/>
     <PathDelim Value="\"/>
     <General>
       <SessionStorage Value="InProjectDir"/>
@@ -32,31 +32,28 @@
         <FormatVersion Value="1"/>
       </local>
     </RunParams>
-    <RequiredPackages Count="8">
+    <RequiredPackages Count="7">
       <Item1>
-        <PackageName Value="uEControls"/>
+        <PackageName Value="creosource"/>
       </Item1>
       <Item2>
-        <PackageName Value="eccontrols"/>
+        <PackageName Value="uEControls"/>
       </Item2>
       <Item3>
-        <PackageName Value="LazControls"/>
+        <PackageName Value="eccontrols"/>
       </Item3>
       <Item4>
-        <PackageName Value="installpkg"/>
+        <PackageName Value="LazControls"/>
       </Item4>
       <Item5>
-        <PackageName Value="line"/>
+        <PackageName Value="installpkg"/>
       </Item5>
       <Item6>
         <PackageName Value="richmemopackage"/>
       </Item6>
       <Item7>
-        <PackageName Value="panelbutton"/>
-      </Item7>
-      <Item8>
         <PackageName Value="LCL"/>
-      </Item8>
+      </Item7>
     </RequiredPackages>
     <Units Count="15">
       <Unit0>
@@ -157,7 +154,6 @@
     </CodeGeneration>
     <Linking>
       <Debugging>
-        <GenerateDebugInfo Value="False"/>
         <StripSymbols Value="True"/>
       </Debugging>
       <LinkSmart Value="True"/>

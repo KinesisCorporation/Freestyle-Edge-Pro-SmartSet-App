@@ -8,8 +8,7 @@ uses
   {$ENDIF}{$ENDIF}
   Interfaces, // this includes the LCL widgetset
   Forms,
-  richmemopackage, uecontrols, u_form_main, u_const, u_form_saveas, 
-  u_form_load;
+  richmemopackage, u_form_main, u_const;
 
 {$R *.res}
 begin

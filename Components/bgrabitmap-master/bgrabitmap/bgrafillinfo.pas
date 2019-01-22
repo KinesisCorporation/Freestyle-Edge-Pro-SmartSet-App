@@ -110,7 +110,7 @@ type
       var inter: ArrayOfTIntersectionInfo; var nbInter: integer); override;
   public
     WindingFactor: integer;
-    constructor Create(x1, y1, x2, y2, rx, ry: single; options: TRoundRectangleOptions);
+    constructor Create(x1, y1, x2, y2, rx, ry: single; options: TRoundRectangleOptions; APixelCenteredCoordinates: boolean = true);
     function SegmentsCurved: boolean; override;
     function GetBounds: TRect; override;
     property TopLeft: TPointF read GetTopLeft;
@@ -128,7 +128,7 @@ type
     procedure ComputeIntersection(cury: single;
       var inter: ArrayOfTIntersectionInfo; var nbInter: integer); override;
   public
-    constructor Create(x1, y1, x2, y2, rx, ry, w: single; options: TRoundRectangleOptions);
+    constructor Create(x1, y1, x2, y2, rx, ry, w: single; options: TRoundRectangleOptions; APixelCenteredCoordinates: boolean = true);
     function GetBounds: TRect; override;
     function SegmentsCurved: boolean; override;
     destructor Destroy; override;
@@ -160,8 +160,9 @@ type
     FNext, FPrev: array of integer;
     function NbMaxIntersection: integer; override;
     procedure SetIntersectionValues(AInter: TIntersectionInfo; AInterX: Single; AWinding, ANumSegment: integer; {%H-}dy: single; {%H-}AData: pointer); virtual;
+    procedure InitPoints(const points: array of TPointF);
   public
-    constructor Create(const points: array of TPointF);
+    constructor Create(const points: array of TPointF; APixelCenteredCoordinates: boolean = true);
     function CreateSegmentData(numPt,nextPt: integer; x,y: single): pointer; virtual;
     procedure FreeSegmentData(data: pointer); virtual;
     function GetBounds: TRect; override;
@@ -179,7 +180,7 @@ type
     procedure ComputeIntersection(cury: single;
       var inter: ArrayOfTIntersectionInfo; var nbInter: integer); override;
   public
-    constructor Create(const points: array of TPointF);
+    constructor Create(const points: array of TPointF; APixelCenteredCoordinates: boolean = true);
     destructor Destroy; override;
     function GetSliceIndex: integer; override;
   end;
@@ -215,7 +216,7 @@ type
     procedure ComputeIntersection(cury: single;
       var inter: ArrayOfTIntersectionInfo; var nbInter: integer); override;
   public
-    constructor Create(const points: array of TPointF);
+    constructor Create(const points: array of TPointF; APixelCenteredCoordinates: boolean = true);
     function CreateIntersectionArray: ArrayOfTIntersectionInfo; override;
     function GetSliceIndex: integer; override;
     destructor Destroy; override;
@@ -627,72 +628,46 @@ end;
 
 { TCustomFillPolyInfo }
 
-constructor TCustomFillPolyInfo.Create(const points: array of TPointF);
+constructor TCustomFillPolyInfo.Create(const points: array of TPointF; APixelCenteredCoordinates: boolean);
 var
-  i, j: integer;
-  First, cur, nbP: integer;
+  cur, first, i, j: integer;
+
 begin
-  setlength(FPoints, length(points));
-  nbP := 0;
-  first := -1;
-  for i := 0 to high(points) do
-  if isEmptyPointF(points[i]) then
-  begin
-    if first<>-1 then
-    begin
-      if nbP = first+1 then //is there only one point?
-      begin
-        dec(nbP);
-        first := -1; //remove subpolygon
-      end else
-      if (FPoints[nbP-1] = FPoints[first]) then
-        dec(nbP); //remove just last looping point
-    end;
-    if first<>-1 then
-    begin
-      FPoints[nbP] := points[i];
-      inc(nbP);
-      first := -1;
-    end;
-  end else
-  if (first=-1) or (points[i]<>points[i-1]) then
-  begin
-    if first = -1 then first := nbP;
-    FPoints[nbP] := points[i];
-    inc(nbP);
-  end;
-  setlength(FPoints, nbP);
+  InitPoints(points);
 
   //look for empty points, correct coordinate and successors
   setlength(FEmptyPt, length(FPoints));
   setlength(FNext, length(FPoints));
 
   cur   := -1;
-  First := -1;
+  first := -1;
   for i := 0 to high(FPoints) do
     if not isEmptyPointF(FPoints[i]) then
     begin
       FEmptyPt[i]  := False;
-      FPoints[i].x += 0.5;
-      FPoints[i].y += 0.5;
+      if APixelCenteredCoordinates then
+      begin
+        FPoints[i].x += 0.5;
+        FPoints[i].y += 0.5;
+      end;
       if cur <> -1 then
         FNext[cur] := i;
-      if First = -1 then
-        First := i;
+      if first = -1 then
+        first := i;
       cur     := i;
     end
     else
     begin
-      if (First <> -1) and (cur <> First) then
-        FNext[cur] := First;
+      if (first <> -1) and (cur <> first) then
+        FNext[cur] := first;
 
       FEmptyPt[i] := True;
       FNext[i] := -1;
       cur   := -1;
-      First := -1;
+      first := -1;
     end;
-  if (First <> -1) and (cur <> First) then
-    FNext[cur] := First;
+  if (first <> -1) and (cur <> first) then
+    FNext[cur] := first;
 
   setlength(FPrev, length(FPoints));
   for i := 0 to high(FPrev) do
@@ -778,6 +753,65 @@ begin
   AInter.SetValues( AInterX, AWinding, ANumSegment );
 end;
 
+procedure TCustomFillPolyInfo.InitPoints(const points: array of TPointF);
+const
+  minDist = 0.00390625; //1 over 256
+
+var
+  i, first, nbP: integer;
+
+  function PointAlmostEqual(const p1,p2: TPointF): boolean;
+  begin
+    result := (abs(p1.x-p2.x) < minDist) and (abs(p1.y-p2.y) < minDist);
+  end;
+
+  procedure EndOfSubPolygon;
+  begin
+    //if there is a subpolygon
+    if first<>-1 then
+    begin
+      //last point is the same as first point?
+      if (nbP >= first+2) and PointAlmostEqual(FPoints[nbP-1],FPoints[first]) then
+        dec(nbP); //remove superfluous looping point
+
+      if (nbP <= first+2) then //are there only one or two points?
+      begin
+        //remove subpolygon because we need at least a triangle
+        nbP := first;
+        first := -1;
+      end;
+
+    end;
+  end;
+
+begin
+  setlength(FPoints, length(points));
+  nbP := 0;
+  first := -1;
+  for i := 0 to high(points) do
+  if isEmptyPointF(points[i]) then
+  begin
+    EndOfSubPolygon;
+    if first<>-1 then
+    begin
+      FPoints[nbP] := EmptyPointF;
+      inc(nbP);
+      first := -1;
+    end;
+  end else
+  if (first=-1) or not PointAlmostEqual(FPoints[nbP-1],points[i]) then
+  begin
+    if first = -1 then first := nbP;
+    FPoints[nbP] := points[i];
+    inc(nbP);
+  end;
+  EndOfSubPolygon;
+  //if last point was a subpolygon delimiter (EmptyPointF) then removes it
+  if (nbP > 0) and isEmptyPointF(FPoints[nbP-1]) then dec(nbP);
+
+  setlength(FPoints, nbP);
+end;
+
 { TFillPolyInfo }
 
 function TFillPolyInfo.NbMaxIntersection: integer;
@@ -806,7 +840,7 @@ begin
   end;
 end;
 
-constructor TFillPolyInfo.Create(const points: array of TPointF);
+constructor TFillPolyInfo.Create(const points: array of TPointF; APixelCenteredCoordinates: boolean);
   function AddSeg(numSlice: integer): integer;
   begin
     result := FSlices[numSlice].nbSegments;
@@ -823,7 +857,7 @@ var
   i,j,k,idSeg: integer;
 
 begin
-  inherited Create(points);
+  inherited Create(points, APixelCenteredCoordinates);
 
   //slice
   nbYList:= length(FPoints);
@@ -1041,12 +1075,12 @@ begin
   end;
 end;
 
-constructor TOnePassFillPolyInfo.Create(const points: array of TPointF);
+constructor TOnePassFillPolyInfo.Create(const points: array of TPointF; APixelCenteredCoordinates: boolean);
 var i,j: integer;
   p: POnePassRecord;
   temp: single;
 begin
-  inherited create(points);
+  inherited create(points, APixelCenteredCoordinates);
 
   FShouldInitializeDrawing := true;
   setlength(FOnePass, length(FPoints));
@@ -1292,7 +1326,7 @@ end;
 
 { TFillRoundRectangleInfo }
 
-constructor TFillRoundRectangleInfo.Create(x1, y1, x2, y2, rx, ry: single; options: TRoundRectangleOptions);
+constructor TFillRoundRectangleInfo.Create(x1, y1, x2, y2, rx, ry: single; options: TRoundRectangleOptions; APixelCenteredCoordinates: boolean);
 var
   temp: Single;
 begin
@@ -1308,10 +1342,13 @@ begin
     x1 := x2;
     x2 := temp;
   end;
-  FX1  := x1 + 0.5;
-  FY1  := y1 + 0.5;
-  FX2  := x2 + 0.5;
-  FY2  := y2 + 0.5;
+  if APixelCenteredCoordinates then
+  begin
+    FX1  := x1 + 0.5;
+    FY1  := y1 + 0.5;
+    FX2  := x2 + 0.5;
+    FY2  := y2 + 0.5;
+  end;
   FRX := abs(rx);
   FRY := abs(ry);
   if 2*FRX > x2-x1 then FRX := (x2-x1)/2;
@@ -1421,7 +1458,7 @@ end;
 
 { TFillBorderRoundRectInfo }
 
-constructor TFillBorderRoundRectInfo.Create(x1, y1, x2, y2, rx, ry, w: single; options: TRoundRectangleOptions);
+constructor TFillBorderRoundRectInfo.Create(x1, y1, x2, y2, rx, ry, w: single; options: TRoundRectangleOptions; APixelCenteredCoordinates: boolean);
 var rdiff: single;
   temp: Single;
 begin
@@ -1445,13 +1482,13 @@ begin
   if 2*rx > x2-x1 then rx := (x2-x1)/2;
   if 2*ry > y2-y1 then ry := (y2-y1)/2;
   rdiff := w*(sqrt(2)-1);
-  FOuterBorder := TFillRoundRectangleInfo.Create(x1-w/2,y1-w/2,x2+w/2,y2+w/2, rx+rdiff, ry+rdiff, options);
+  FOuterBorder := TFillRoundRectangleInfo.Create(x1-w/2,y1-w/2,x2+w/2,y2+w/2, rx+rdiff, ry+rdiff, options, APixelCenteredCoordinates);
   if (abs(x2-x1) > w) and (abs(y2-y1) > w) then
   begin
     if (rx-rdiff <= 0) or (ry-rdiff <= 0) then
-      FInnerBorder := TFillRoundRectangleInfo.Create(x1+w/2, y1+w/2, x2-w/2, y2-w/2, 0,0, options)
+      FInnerBorder := TFillRoundRectangleInfo.Create(x1+w/2, y1+w/2, x2-w/2, y2-w/2, 0,0, options, APixelCenteredCoordinates)
     else
-      FInnerBorder := TFillRoundRectangleInfo.Create(x1+w/2, y1+w/2, x2-w/2, y2-w/2, rx-rdiff, ry-rdiff, options);
+      FInnerBorder := TFillRoundRectangleInfo.Create(x1+w/2, y1+w/2, x2-w/2, y2-w/2, rx-rdiff, ry-rdiff, options, APixelCenteredCoordinates);
     FInnerBorder.WindingFactor := -1;
   end
   else

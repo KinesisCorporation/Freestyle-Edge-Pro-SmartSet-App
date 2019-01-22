@@ -21,13 +21,16 @@
       <Item2>
         <Filename Value="labelbox.pas"/>
         <HasRegisterProc Value="True"/>
-        <UnitName Value="labelbox"/>
+        <UnitName Value="LabelBox"/>
       </Item2>
     </Files>
-    <RequiredPkgs Count="1">
+    <RequiredPkgs Count="2">
       <Item1>
-        <PackageName Value="IDEIntf"/>
+        <PackageName Value="BGRABitmapPack"/>
       </Item1>
+      <Item2>
+        <PackageName Value="IDEIntf"/>
+      </Item2>
     </RequiredPkgs>
     <UsageOptions>
       <UnitPath Value="$(PkgOutDir)"/>

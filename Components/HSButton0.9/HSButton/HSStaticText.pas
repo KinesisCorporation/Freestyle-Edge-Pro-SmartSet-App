@@ -30,8 +30,9 @@ interface
 
 uses
   {$ifdef Win32}Windows, {$endif}
-  {$ifdef Darwin}LCLIntf, lcltype, MacOSAll, CarbonUtils, CarbonDef, CarbonProc, {$endif}
-  {$ifdef fpc} LMessages {$else} messages {$endif}, Classes, Graphics, Controls, Forms, HSButtons;
+  {$ifdef Darwin}MacOSAll, CarbonUtils, CarbonDef, CarbonProc, {$endif}
+  {$ifdef fpc} LMessages {$else} messages {$endif}, Classes, Graphics, Controls, Forms, HSButtons,
+  LCLIntf, LCLType;
 
 type
    THSStaticText = class(TCustomControl)

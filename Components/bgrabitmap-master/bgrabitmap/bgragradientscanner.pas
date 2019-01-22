@@ -10,64 +10,77 @@ uses
   Classes, SysUtils, BGRABitmapTypes, BGRATransform;
 
 type
-  { TBGRASimpleGradientWithoutGammaCorrection }
+  TBGRAColorInterpolation = (ciStdRGB, ciLinearRGB, ciLinearHSLPositive, ciLinearHSLNegative, ciGSBPositive, ciGSBNegative);
+  TBGRAGradientRepetition = (grPad, grRepeat, grReflect, grSine);
 
-  TBGRASimpleGradientWithoutGammaCorrection = class(TBGRACustomGradient)
-  private
+  { TBGRASimpleGradient }
+
+  TBGRASimpleGradient = class(TBGRACustomGradient)
+  protected
     FColor1,FColor2: TBGRAPixel;
     ec1,ec2: TExpandedPixel;
+    FRepetition: TBGRAGradientRepetition;
+    constructor Create(AColor1,AColor2: TBGRAPixel; ARepetition: TBGRAGradientRepetition);
+    constructor Create(AColor1,AColor2: TExpandedPixel; ARepetition: TBGRAGradientRepetition);
+    function InterpolateToBGRA(position: word): TBGRAPixel; virtual; abstract;
+    function InterpolateToExpanded(position: word): TExpandedPixel; virtual; abstract;
   public
-    constructor Create(Color1,Color2: TBGRAPixel);
+    class function CreateAny(AInterpolation: TBGRAColorInterpolation; AColor1,AColor2: TBGRAPixel; ARepetition: TBGRAGradientRepetition): TBGRASimpleGradient; overload;
+    class function CreateAny(AInterpolation: TBGRAColorInterpolation; AColor1,AColor2: TExpandedPixel; ARepetition: TBGRAGradientRepetition): TBGRASimpleGradient; overload;
     function GetColorAt(position: integer): TBGRAPixel; override;
     function GetColorAtF(position: single): TBGRAPixel; override;
     function GetExpandedColorAt(position: integer): TExpandedPixel; override;
     function GetExpandedColorAtF(position: single): TExpandedPixel; override;
     function GetAverageColor: TBGRAPixel; override;
+    function GetAverageExpandedColor: TExpandedPixel; override;
     function GetMonochrome: boolean; override;
+    property Repetition: TBGRAGradientRepetition read FRepetition write FRepetition;
+  end;
+
+  { TBGRASimpleGradientWithoutGammaCorrection }
+
+  TBGRASimpleGradientWithoutGammaCorrection = class(TBGRASimpleGradient)
+  protected
+    function InterpolateToBGRA(position: word): TBGRAPixel; override;
+    function InterpolateToExpanded(position: word): TExpandedPixel; override;
+  public
+    constructor Create(Color1,Color2: TBGRAPixel; ARepetition: TBGRAGradientRepetition = grPad);
+    constructor Create(Color1,Color2: TExpandedPixel; ARepetition: TBGRAGradientRepetition = grPad);
   end;
 
   { TBGRASimpleGradientWithGammaCorrection }
 
-  TBGRASimpleGradientWithGammaCorrection = class(TBGRACustomGradient)
-  private
-    FColor1,FColor2: TBGRAPixel;
-    ec1,ec2: TExpandedPixel;
+  TBGRASimpleGradientWithGammaCorrection = class(TBGRASimpleGradient)
+  protected
+    function InterpolateToBGRA(position: word): TBGRAPixel; override;
+    function InterpolateToExpanded(position: word): TExpandedPixel; override;
   public
-    constructor Create(Color1,Color2: TBGRAPixel);
-    function GetColorAt(position: integer): TBGRAPixel; override;
-    function GetColorAtF(position: single): TBGRAPixel; override;
-    function GetAverageColor: TBGRAPixel; override;
-    function GetExpandedColorAt(position: integer): TExpandedPixel; override;
-    function GetExpandedColorAtF(position: single): TExpandedPixel; override;
-    function GetAverageExpandedColor: TExpandedPixel; override;
-    function GetMonochrome: boolean; override;
+    constructor Create(Color1,Color2: TBGRAPixel; ARepetition: TBGRAGradientRepetition = grPad);
+    constructor Create(Color1,Color2: TExpandedPixel; ARepetition: TBGRAGradientRepetition = grPad);
   end;
 
-  THueGradientOption = (hgoRepeat, hgoPositiveDirection, hgoNegativeDirection, hgoHueCorrection, hgoLightnessCorrection);
+  THueGradientOption = (hgoRepeat, hgoReflect,                       //repetition
+                        hgoPositiveDirection, hgoNegativeDirection,  //hue orientation
+                        hgoHueCorrection, hgoLightnessCorrection);   //color interpolation
   THueGradientOptions = set of THueGradientOption;
 
   { TBGRAHueGradient }
 
-  TBGRAHueGradient = class(TBGRACustomGradient)
+  TBGRAHueGradient = class(TBGRASimpleGradient)
   private
-    FColor1,FColor2: TBGRAPixel;
-    ec1,ec2: TExpandedPixel;
     hsla1,hsla2: THSLAPixel;
     hue1,hue2: longword;
     FOptions: THueGradientOptions;
     procedure Init(c1,c2: THSLAPixel; AOptions: THueGradientOptions);
-    function GetColorNoBoundCheck(position: integer): THSLAPixel;
+    function InterpolateToHSLA(position: word): THSLAPixel;
+  protected
+    function InterpolateToBGRA(position: word): TBGRAPixel; override;
+    function InterpolateToExpanded(position: word): TExpandedPixel; override;
   public
     constructor Create(Color1,Color2: TBGRAPixel; options: THueGradientOptions); overload;
+    constructor Create(Color1,Color2: TExpandedPixel; options: THueGradientOptions); overload;
     constructor Create(Color1,Color2: THSLAPixel; options: THueGradientOptions); overload;
     constructor Create(AHue1,AHue2: Word; Saturation,Lightness: Word; options: THueGradientOptions); overload;
-    function GetColorAt(position: integer): TBGRAPixel; override;
-    function GetColorAtF(position: single): TBGRAPixel; override;
-    function GetAverageColor: TBGRAPixel; override;
-    function GetExpandedColorAt(position: integer): TExpandedPixel; override;
-    function GetExpandedColorAtF(position: single): TExpandedPixel; override;
-    function GetAverageExpandedColor: TExpandedPixel; override;
-    function GetMonochrome: boolean; override;
   end;
 
   TGradientInterpolationFunction = function(t: single): single of object;
@@ -95,31 +108,87 @@ type
     property InterpolationFunction: TGradientInterpolationFunction read FInterpolationFunction write FInterpolationFunction;
   end;
 
+  TBGRAGradientScannerInternalScanNextFunc = function():single of object;
+  TBGRAGradientScannerInternalScanAtFunc = function(const p: TPointF):single of object;
+
   { TBGRAGradientScanner }
 
   TBGRAGradientScanner = class(TBGRACustomScanner)
   protected
     FGradientType: TGradientType;
-    FOrigin1,FOrigin2: TPointF;
+    FOrigin,FDir1,FDir2: TPointF;
+    FRelativeFocal: TPointF;
+    FRadius, FFocalRadius: single;
+    FTransform, FHiddenTransform: TAffineMatrix;
     FSinus: Boolean;
-    u: TPointF;
-    len,aFactor,aFactorF: single;
-    mergedColor: TBGRAPixel;
-    mergedExpandedColor: TExpandedPixel;
     FGradient: TBGRACustomGradient;
     FGradientOwner: boolean;
+    FFlipGradient: boolean;
+
+    FMatrix: TAffineMatrix;
+    FRepeatHoriz, FIsAverage: boolean;
+    FAverageColor: TBGRAPixel;
+    FAverageExpandedColor: TExpandedPixel;
+    FScanNextFunc: TBGRAGradientScannerInternalScanNextFunc;
+    FScanAtFunc: TBGRAGradientScannerInternalScanAtFunc;
+    FFocalDistance: single;
+    FFocalDirection, FFocalNormal: TPointF;
+    FRadialDenominator, FRadialDeltaSign, maxW1, maxW2: single;
+
+    FPosition: TPointF;
     FHorizColor: TBGRAPixel;
     FHorizExpandedColor: TExpandedPixel;
-    FVertical: boolean;
-    FDotProduct,FDotProductPerp: Single;
-    procedure Init(gtype: TGradientType; o1, o2: TPointF; Sinus: Boolean=False);
-    procedure InitScanInline(x,y: integer);
+
+    procedure Init(AGradientType: TGradientType; AOrigin, d1: TPointF; ATransform: TAffineMatrix; Sinus: Boolean=False);
+    procedure Init(AGradientType: TGradientType; AOrigin, d1, d2: TPointF; ATransform: TAffineMatrix; Sinus: Boolean=False);
+    procedure Init(AOrigin: TPointF; ARadius: single; AFocal: TPointF; AFocalRadius: single; ATransform: TAffineMatrix; AHiddenTransform: TAffineMatrix);
+
+    procedure InitGradientType;
+    procedure InitTransform;
+    procedure InitGradient;
+
+    function ComputeRadialFocal(const p: TPointF): single;
+
+    function ScanNextLinear: single;
+    function ScanNextReflected: single;
+    function ScanNextDiamond: single;
+    function ScanNextRadial: single;
+    function ScanNextRadial2: single;
+    function ScanNextRadialFocal: single;
+
+    function ScanAtLinear(const p: TPointF): single;
+    function ScanAtReflected(const p: TPointF): single;
+    function ScanAtDiamond(const p: TPointF): single;
+    function ScanAtRadial(const p: TPointF): single;
+    function ScanAtRadial2(const p: TPointF): single;
+    function ScanAtRadialFocal(const p: TPointF): single;
+
     function ScanNextInline: TBGRAPixel; inline;
     function ScanNextExpandedInline: TExpandedPixel; inline;
+    procedure SetTransform(AValue: TAffineMatrix);
+    procedure SetFlipGradient(AValue: boolean);
+    function GetGradientColor(a: single): TBGRAPixel;
+    function GetGradientExpandedColor(a: single): TExpandedPixel;
   public
-    constructor Create(c1, c2: TBGRAPixel; gtype: TGradientType; o1, o2: TPointF;
+    constructor Create(AGradientType: TGradientType; AOrigin, d1: TPointF);
+    constructor Create(AGradientType: TGradientType; AOrigin, d1, d2: TPointF);
+    constructor Create(AOrigin, d1, d2, AFocal: TPointF; ARadiusRatio: single = 1; AFocalRadiusRatio: single = 0);
+    constructor Create(AOrigin: TPointF; ARadius: single; AFocal: TPointF; AFocalRadius: single);
+
+    constructor Create(c1, c2: TBGRAPixel; AGradientType: TGradientType; AOrigin, d1: TPointF;
                        gammaColorCorrection: boolean = True; Sinus: Boolean=False);
-    constructor Create(gradient: TBGRACustomGradient; gtype: TGradientType; o1, o2: TPointF; Sinus: Boolean=False; AGradientOwner: Boolean=False);
+    constructor Create(c1, c2: TBGRAPixel; AGradientType: TGradientType; AOrigin, d1, d2: TPointF;
+                       gammaColorCorrection: boolean = True; Sinus: Boolean=False);
+
+    constructor Create(gradient: TBGRACustomGradient; AGradientType: TGradientType; AOrigin, d1: TPointF;
+                       Sinus: Boolean=False; AGradientOwner: Boolean=False);
+    constructor Create(gradient: TBGRACustomGradient; AGradientType: TGradientType; AOrigin, d1, d2: TPointF;
+                       Sinus: Boolean=False; AGradientOwner: Boolean=False);
+    constructor Create(gradient: TBGRACustomGradient; AOrigin: TPointF; ARadius: single; AFocal: TPointF;
+                       AFocalRadius: single; AGradientOwner: Boolean=False);
+
+    procedure SetGradient(c1,c2: TBGRAPixel; AGammaCorrection: boolean = true); overload;
+    procedure SetGradient(AGradient: TBGRACustomGradient; AOwner: boolean); overload;
     destructor Destroy; override;
     procedure ScanMoveTo(X, Y: Integer); override;
     function ScanNextPixel: TBGRAPixel; override;
@@ -128,6 +197,10 @@ type
     function ScanAtExpanded(X, Y: Single): TExpandedPixel; override;
     procedure ScanPutPixels(pdest: PBGRAPixel; count: integer; mode: TDrawMode); override;
     function IsScanPutPixelsDefined: boolean; override;
+    property Transform: TAffineMatrix read FTransform write SetTransform;
+    property Gradient: TBGRACustomGradient read FGradient;
+    property FlipGradient: boolean read FFlipGradient write SetFlipGradient;
+    property Sinus: boolean Read FSinus write FSinus;
   end;
 
   { TBGRAConstantScanner }
@@ -142,6 +215,7 @@ type
   private
     FOpacity: byte;
     FGrayscale: boolean;
+    FRandomBuffer, FRandomBufferCount: integer;
   public
     constructor Create(AGrayscale: Boolean; AOpacity: byte);
     function ScanAtInteger({%H-}X, {%H-}Y: integer): TBGRAPixel; override;
@@ -230,6 +304,168 @@ implementation
 
 uses BGRABlend, Math;
 
+{ TBGRASimpleGradient }
+
+constructor TBGRASimpleGradient.Create(AColor1, AColor2: TBGRAPixel; ARepetition: TBGRAGradientRepetition);
+begin
+  FColor1 := AColor1;
+  FColor2 := AColor2;
+  ec1 := GammaExpansion(AColor1);
+  ec2 := GammaExpansion(AColor2);
+  FRepetition:= ARepetition;
+end;
+
+constructor TBGRASimpleGradient.Create(AColor1, AColor2: TExpandedPixel;
+  ARepetition: TBGRAGradientRepetition);
+begin
+  FColor1 := GammaCompression(AColor1);
+  FColor2 := GammaCompression(AColor2);
+  ec1 := AColor1;
+  ec2 := AColor2;
+  FRepetition:= ARepetition;
+end;
+
+class function TBGRASimpleGradient.CreateAny(AInterpolation: TBGRAColorInterpolation;
+  AColor1, AColor2: TBGRAPixel; ARepetition: TBGRAGradientRepetition): TBGRASimpleGradient;
+begin
+  case AInterpolation of
+    ciStdRGB: result := TBGRASimpleGradientWithoutGammaCorrection.Create(AColor1,AColor2);
+    ciLinearRGB: result := TBGRASimpleGradientWithGammaCorrection.Create(AColor1,AColor2);
+    ciLinearHSLPositive: result := TBGRAHueGradient.Create(AColor1,AColor2,[hgoPositiveDirection]);
+    ciLinearHSLNegative: result := TBGRAHueGradient.Create(AColor1,AColor2,[hgoNegativeDirection]);
+    ciGSBPositive: result := TBGRAHueGradient.Create(AColor1,AColor2,[hgoPositiveDirection, hgoHueCorrection, hgoLightnessCorrection]);
+    ciGSBNegative: result := TBGRAHueGradient.Create(AColor1,AColor2,[hgoNegativeDirection, hgoHueCorrection, hgoLightnessCorrection]);
+  end;
+  result.Repetition := ARepetition;
+end;
+
+class function TBGRASimpleGradient.CreateAny(AInterpolation: TBGRAColorInterpolation;
+  AColor1, AColor2: TExpandedPixel; ARepetition: TBGRAGradientRepetition): TBGRASimpleGradient;
+begin
+  case AInterpolation of
+    ciStdRGB: result := TBGRASimpleGradientWithoutGammaCorrection.Create(AColor1,AColor2);
+    ciLinearRGB: result := TBGRASimpleGradientWithGammaCorrection.Create(AColor1,AColor2);
+    ciLinearHSLPositive: result := TBGRAHueGradient.Create(AColor1,AColor2,[hgoPositiveDirection]);
+    ciLinearHSLNegative: result := TBGRAHueGradient.Create(AColor1,AColor2,[hgoNegativeDirection]);
+    ciGSBPositive: result := TBGRAHueGradient.Create(AColor1,AColor2,[hgoPositiveDirection, hgoHueCorrection, hgoLightnessCorrection]);
+    ciGSBNegative: result := TBGRAHueGradient.Create(AColor1,AColor2,[hgoNegativeDirection, hgoHueCorrection, hgoLightnessCorrection]);
+  end;
+  result.Repetition := ARepetition;
+end;
+
+function TBGRASimpleGradient.GetAverageColor: TBGRAPixel;
+begin
+  result := InterpolateToBGRA(32768);
+end;
+
+function TBGRASimpleGradient.GetAverageExpandedColor: TExpandedPixel;
+begin
+  Result:= InterpolateToExpanded(32768);
+end;
+
+function TBGRASimpleGradient.GetColorAt(position: integer): TBGRAPixel;
+begin
+  case FRepetition of
+  grSine: begin
+            position := Sin65536(position and $ffff);
+            if position = 65536 then
+              result := FColor2
+            else
+              result := InterpolateToBGRA(position);
+          end;
+  grRepeat: result := InterpolateToBGRA(position and $ffff);
+  grReflect:
+    begin
+      position := position and $1ffff;
+      if position >= $10000 then
+      begin
+        if position = $10000 then
+          result := FColor2
+        else
+          result := InterpolateToBGRA($20000 - position);
+      end
+      else
+        result := InterpolateToBGRA(position);
+    end;
+  else
+    begin
+      if position <= 0 then
+        result := FColor1 else
+      if position >= 65536 then
+        result := FColor2 else
+        result := InterpolateToBGRA(position);
+    end;
+  end;
+end;
+
+function TBGRASimpleGradient.GetColorAtF(position: single): TBGRAPixel;
+begin
+  if FRepetition <> grPad then
+    result := GetColorAt(round(frac(position*0.5)*131072)) else  //divided by 2 for reflected repetition
+  begin
+    if position <= 0 then
+      result := FColor1 else
+    if position >= 1 then
+      result := FColor2 else
+      result := GetColorAt(round(position*65536));
+  end;
+end;
+
+function TBGRASimpleGradient.GetExpandedColorAt(position: integer
+  ): TExpandedPixel;
+begin
+  case FRepetition of
+  grSine: begin
+            position := Sin65536(position and $ffff);
+            if position = 65536 then
+              result := ec2
+            else
+              result := InterpolateToExpanded(position);
+          end;
+  grRepeat: result := InterpolateToExpanded(position and $ffff);
+  grReflect:
+    begin
+      position := position and $1ffff;
+      if position >= $10000 then
+      begin
+        if position = $10000 then
+          result := ec2
+        else
+          result := InterpolateToExpanded($20000 - position);
+      end
+      else
+        result := InterpolateToExpanded(position);
+    end;
+  else
+    begin
+      if position <= 0 then
+        result := ec1 else
+      if position >= 65536 then
+        result := ec2 else
+        result := InterpolateToExpanded(position);
+    end;
+  end;
+end;
+
+function TBGRASimpleGradient.GetExpandedColorAtF(position: single
+  ): TExpandedPixel;
+begin
+  if FRepetition <> grPad then
+    result := GetExpandedColorAt(round(frac(position*0.5)*131072)) else  //divided by 2 for reflected repetition
+  begin
+    if position <= 0 then
+      result := ec1 else
+    if position >= 1 then
+      result := ec2 else
+      result := GetExpandedColorAt(round(position*65536));
+  end;
+end;
+
+function TBGRASimpleGradient.GetMonochrome: boolean;
+begin
+  Result:= (FColor1 = FColor2);
+end;
+
 { TBGRAConstantScanner }
 
 constructor TBGRAConstantScanner.Create(c: TBGRAPixel);
@@ -243,6 +479,7 @@ constructor TBGRARandomScanner.Create(AGrayscale: Boolean; AOpacity: byte);
 begin
   FGrayscale:= AGrayscale;
   FOpacity:= AOpacity;
+  FRandomBufferCount := 0;
 end;
 
 function TBGRARandomScanner.ScanAtInteger(X, Y: integer): TBGRAPixel;
@@ -251,15 +488,26 @@ begin
 end;
 
 function TBGRARandomScanner.ScanNextPixel: TBGRAPixel;
+var rgb: integer;
 begin
   if FGrayscale then
   begin
-    result.red := random(256);
+    if FRandomBufferCount = 0 then
+    begin
+      FRandomBuffer := random(256*256*256);
+      FRandomBufferCount := 3;
+    end;
+    result.red := FRandomBuffer and 255;
+    FRandomBuffer:= FRandomBuffer shr 8;
+    FRandomBufferCount -= 1;
     result.green := result.red;
     result.blue := result.red;
     result.alpha:= FOpacity;
   end else
-    Result:= BGRA(random(256),random(256),random(256),FOpacity);
+  begin
+    rgb := random(256*256*256);
+    Result:= BGRA(rgb and 255,(rgb shr 8) and 255,(rgb shr 16) and 255,FOpacity);
+  end;
 end;
 
 function TBGRARandomScanner.ScanAt(X, Y: Single): TBGRAPixel;
@@ -271,15 +519,11 @@ end;
 
 procedure TBGRAHueGradient.Init(c1, c2: THSLAPixel; AOptions: THueGradientOptions);
 begin
-  FColor1 := HSLAToBGRA(c1);
-  FColor2 := HSLAToBGRA(c2);
-  ec1 := GammaExpansion(FColor1);
-  ec2 := GammaExpansion(FColor2);
   FOptions:= AOptions;
   if (hgoLightnessCorrection in AOptions) then
   begin
-    hsla1 := BGRAToGSBA(FColor1);
-    hsla2 := BGRAToGSBA(FColor2);
+    hsla1 := ExpandedToGSBA(ec1);
+    hsla2 := ExpandedToGSBA(ec2);
   end else
   begin
     hsla1 := c1;
@@ -304,7 +548,7 @@ begin
   end;
 end;
 
-function TBGRAHueGradient.GetColorNoBoundCheck(position: integer): THSLAPixel;
+function TBGRAHueGradient.InterpolateToHSLA(position: word): THSLAPixel;
 var b,b2: LongWord;
 begin
   b      := position shr 2;
@@ -324,159 +568,63 @@ begin
   end;
 end;
 
+function TBGRAHueGradient.InterpolateToBGRA(position: word): TBGRAPixel;
+begin
+  if hgoLightnessCorrection in FOptions then
+    result := GSBAToBGRA(InterpolateToHSLA(position))
+  else
+    result := HSLAToBGRA(InterpolateToHSLA(position));
+end;
+
+function TBGRAHueGradient.InterpolateToExpanded(position: word): TExpandedPixel;
+begin
+  if hgoLightnessCorrection in FOptions then
+    result := GSBAToExpanded(InterpolateToHSLA(position))
+  else
+    result := HSLAToExpanded(InterpolateToHSLA(position));
+end;
+
 constructor TBGRAHueGradient.Create(Color1, Color2: TBGRAPixel;options: THueGradientOptions);
 begin
+  if hgoReflect in options then
+    inherited Create(Color1,Color2,grReflect)
+  else if hgoRepeat in options then
+    inherited Create(Color1,Color2,grRepeat)
+  else
+    inherited Create(Color1,Color2,grPad);
+
   Init(BGRAToHSLA(Color1),BGRAToHSLA(Color2),options);
+end;
+
+constructor TBGRAHueGradient.Create(Color1, Color2: TExpandedPixel;
+  options: THueGradientOptions);
+begin
+  if hgoReflect in options then
+    inherited Create(Color1,Color2,grReflect)
+  else if hgoRepeat in options then
+    inherited Create(Color1,Color2,grRepeat)
+  else
+    inherited Create(Color1,Color2,grPad);
+
+  Init(ExpandedToHSLA(Color1),ExpandedToHSLA(Color2),options);
 end;
 
 constructor TBGRAHueGradient.Create(Color1, Color2: THSLAPixel; options: THueGradientOptions);
 begin
+  if hgoReflect in options then
+    inherited Create(Color1.ToExpanded,Color2.ToExpanded,grReflect)
+  else if hgoRepeat in options then
+    inherited Create(Color1.ToExpanded,Color2.ToExpanded,grRepeat)
+  else
+    inherited Create(Color1.ToExpanded,Color2.ToExpanded,grPad);
+
   Init(Color1,Color2, options);
 end;
 
 constructor TBGRAHueGradient.Create(AHue1, AHue2: Word; Saturation,
   Lightness: Word; options: THueGradientOptions);
 begin
-  Init(HSLA(AHue1,saturation,lightness), HSLA(AHue2,saturation,lightness), options);
-end;
-
-function TBGRAHueGradient.GetColorAt(position: integer): TBGRAPixel;
-var interm: THSLAPixel;
-begin
-  if hgoRepeat in FOptions then
-  begin
-    position := position and $ffff;
-    if position = 0 then
-    begin
-      result := FColor1;
-      exit;
-    end;
-  end else
-  begin
-    if position <= 0 then
-    begin
-      result := FColor1;
-      exit
-    end else
-    if position >= 65536 then
-    begin
-      result := FColor2;
-      exit
-    end;
-  end;
-  interm := GetColorNoBoundCheck(position);
-  if hgoLightnessCorrection in FOptions then
-    result := GSBAToBGRA(interm)
-  else
-    result := HSLAToBGRA(interm);
-end;
-
-function TBGRAHueGradient.GetColorAtF(position: single): TBGRAPixel;
-var interm: THSLAPixel;
-begin
-  if hgoRepeat in FOptions then
-  begin
-    position := frac(position);
-    if position = 0 then
-    begin
-      result := FColor1;
-      exit;
-    end;
-  end else
-  begin
-    if position <= 0 then
-    begin
-      result := FColor1;
-      exit;
-    end else
-    if position >= 1 then
-    begin
-      result := FColor2;
-      exit
-    end;
-  end;
-  interm := GetColorNoBoundCheck(round(position*65536));
-  if hgoLightnessCorrection in FOptions then
-    result := GSBAToBGRA(interm)
-  else
-    result := HSLAToBGRA(interm);
-end;
-
-function TBGRAHueGradient.GetAverageColor: TBGRAPixel;
-begin
-  Result:= GetColorAt(32768);
-end;
-
-function TBGRAHueGradient.GetExpandedColorAt(position: integer): TExpandedPixel;
-var interm: THSLAPixel;
-begin
-  if hgoRepeat in FOptions then
-  begin
-    position := position and $ffff;
-    if position = 0 then
-    begin
-      result := ec1;
-      exit;
-    end;
-  end else
-  begin
-    if position <= 0 then
-    begin
-      result := ec1;
-      exit
-    end else
-    if position >= 65536 then
-    begin
-      result := ec2;
-      exit
-    end;
-  end;
-  interm := GetColorNoBoundCheck(position);
-  if hgoLightnessCorrection in FOptions then
-    result := GSBAToExpanded(interm)
-  else
-    result := HSLAToExpanded(interm);
-end;
-
-function TBGRAHueGradient.GetExpandedColorAtF(position: single): TExpandedPixel;
-var interm: THSLAPixel;
-begin
-  if hgoRepeat in FOptions then
-  begin
-    position := frac(position);
-    if position = 0 then
-    begin
-      result := ec1;
-      exit;
-    end;
-  end else
-  begin
-    if position <= 0 then
-    begin
-      result := ec1;
-      exit;
-    end else
-    if position >= 1 then
-    begin
-      result := ec2;
-      exit
-    end;
-  end;
-  interm := GetColorNoBoundCheck(round(position*65536));
-  if hgoLightnessCorrection in FOptions then
-    result := GSBAToExpanded(interm)
-  else
-    result := HSLAToExpanded(interm);
-end;
-
-function TBGRAHueGradient.GetAverageExpandedColor: TExpandedPixel;
-begin
-  Result:= GetExpandedColorAt(32768);
-end;
-
-function TBGRAHueGradient.GetMonochrome: boolean;
-begin
-  Result:= false;
+  Create(HSLA(AHue1,saturation,lightness), HSLA(AHue2,saturation,lightness), options);
 end;
 
 { TBGRAMultiGradient }
@@ -669,184 +817,97 @@ end;
 
 { TBGRASimpleGradientWithGammaCorrection }
 
-constructor TBGRASimpleGradientWithGammaCorrection.Create(Color1,
-  Color2: TBGRAPixel);
-begin
-  FColor1 := Color1;
-  FColor2 := Color2;
-  ec1 := GammaExpansion(Color1);
-  ec2 := GammaExpansion(Color2);
-end;
-
-function TBGRASimpleGradientWithGammaCorrection.GetColorAt(position: integer
+function TBGRASimpleGradientWithGammaCorrection.InterpolateToBGRA(position: word
   ): TBGRAPixel;
 var b,b2: cardinal;
     ec: TExpandedPixel;
 begin
-  if position <= 0 then
-    result := FColor1 else
-  if position >= 65536 then
-    result := FColor2 else
-  begin
-    b      := position;
-    b2     := 65536-b;
-    ec.red := (ec1.red * b2 + ec2.red * b + 32767) shr 16;
-    ec.green := (ec1.green * b2 + ec2.green * b + 32767) shr 16;
-    ec.blue := (ec1.blue * b2 + ec2.blue * b + 32767) shr 16;
-    ec.alpha := (ec1.alpha * b2 + ec2.alpha * b + 32767) shr 16;
-    result := GammaCompression(ec);
-  end;
+  b      := position;
+  b2     := 65536-b;
+  ec.red := (ec1.red * b2 + ec2.red * b + 32767) shr 16;
+  ec.green := (ec1.green * b2 + ec2.green * b + 32767) shr 16;
+  ec.blue := (ec1.blue * b2 + ec2.blue * b + 32767) shr 16;
+  ec.alpha := (ec1.alpha * b2 + ec2.alpha * b + 32767) shr 16;
+  result := GammaCompression(ec);
 end;
 
-function TBGRASimpleGradientWithGammaCorrection.GetColorAtF(position: single): TBGRAPixel;
-var b,b2: cardinal;
-    ec: TExpandedPixel;
-begin
-  if position <= 0 then
-    result := FColor1 else
-  if position >= 1 then
-    result := FColor2 else
-  begin
-    b      := round(position*65536);
-    b2     := 65536-b;
-    ec.red := (ec1.red * b2 + ec2.red * b + 32767) shr 16;
-    ec.green := (ec1.green * b2 + ec2.green * b + 32767) shr 16;
-    ec.blue := (ec1.blue * b2 + ec2.blue * b + 32767) shr 16;
-    ec.alpha := (ec1.alpha * b2 + ec2.alpha * b + 32767) shr 16;
-    result := GammaCompression(ec);
-  end;
-end;
-
-function TBGRASimpleGradientWithGammaCorrection.GetAverageColor: TBGRAPixel;
-begin
-  result := GammaCompression(MergeBGRA(ec1,ec2));
-end;
-
-function TBGRASimpleGradientWithGammaCorrection.GetExpandedColorAt(
-  position: integer): TExpandedPixel;
+function TBGRASimpleGradientWithGammaCorrection.InterpolateToExpanded(
+  position: word): TExpandedPixel;
 var b,b2: cardinal;
 begin
-  if position <= 0 then
-    result := ec1 else
-  if position >= 65536 then
-    result := ec2 else
-  begin
-    b      := position;
-    b2     := 65536-b;
-    result.red := (ec1.red * b2 + ec2.red * b + 32767) shr 16;
-    result.green := (ec1.green * b2 + ec2.green * b + 32767) shr 16;
-    result.blue := (ec1.blue * b2 + ec2.blue * b + 32767) shr 16;
-    result.alpha := (ec1.alpha * b2 + ec2.alpha * b + 32767) shr 16;
-  end;
+  b      := position;
+  b2     := 65536-b;
+  result.red := (ec1.red * b2 + ec2.red * b + 32767) shr 16;
+  result.green := (ec1.green * b2 + ec2.green * b + 32767) shr 16;
+  result.blue := (ec1.blue * b2 + ec2.blue * b + 32767) shr 16;
+  result.alpha := (ec1.alpha * b2 + ec2.alpha * b + 32767) shr 16;
 end;
 
-function TBGRASimpleGradientWithGammaCorrection.GetExpandedColorAtF(
-  position: single): TExpandedPixel;
-var b,b2: cardinal;
+constructor TBGRASimpleGradientWithGammaCorrection.Create(Color1,
+  Color2: TBGRAPixel; ARepetition: TBGRAGradientRepetition);
 begin
-  if position <= 0 then
-    result := ec1 else
-  if position >= 1 then
-    result := ec2 else
-  begin
-    b      := round(position*65536);
-    b2     := 65536-b;
-    result.red := (ec1.red * b2 + ec2.red * b + 32767) shr 16;
-    result.green := (ec1.green * b2 + ec2.green * b + 32767) shr 16;
-    result.blue := (ec1.blue * b2 + ec2.blue * b + 32767) shr 16;
-    result.alpha := (ec1.alpha * b2 + ec2.alpha * b + 32767) shr 16;
-  end;
+  inherited Create(Color1,Color2,ARepetition);
 end;
 
-function TBGRASimpleGradientWithGammaCorrection.GetAverageExpandedColor: TExpandedPixel;
+constructor TBGRASimpleGradientWithGammaCorrection.Create(Color1,
+  Color2: TExpandedPixel; ARepetition: TBGRAGradientRepetition);
 begin
-  result := MergeBGRA(ec1,ec2);
-end;
-
-function TBGRASimpleGradientWithGammaCorrection.GetMonochrome: boolean;
-begin
-  Result:= (FColor1 = FColor2);
+  inherited Create(Color1,Color2,ARepetition);
 end;
 
 { TBGRASimpleGradientWithoutGammaCorrection }
 
-constructor TBGRASimpleGradientWithoutGammaCorrection.Create(Color1,
-  Color2: TBGRAPixel);
-begin
-  FColor1 := Color1;
-  FColor2 := Color2;
-  ec1 := GammaExpansion(Color1);
-  ec2 := GammaExpansion(Color2);
-end;
-
-function TBGRASimpleGradientWithoutGammaCorrection.GetColorAt(position: integer
-  ): TBGRAPixel;
+function TBGRASimpleGradientWithoutGammaCorrection.InterpolateToBGRA(
+  position: word): TBGRAPixel;
 var b,b2: cardinal;
 begin
-  if position <= 0 then
-    result := FColor1 else
-  if position >= 65536 then
-    result := FColor2 else
-  begin
-    b      := position shr 6;
-    b2     := 1024-b;
-    result.red  := (FColor1.red * b2 + FColor2.red * b + 511) shr 10;
-    result.green := (FColor1.green * b2 + FColor2.green * b + 511) shr 10;
-    result.blue := (FColor1.blue * b2 + FColor2.blue * b + 511) shr 10;
-    result.alpha := (FColor1.alpha * b2 + FColor2.alpha * b + 511) shr 10;
-  end;
+  b      := position shr 6;
+  b2     := 1024-b;
+  result.red  := (FColor1.red * b2 + FColor2.red * b + 511) shr 10;
+  result.green := (FColor1.green * b2 + FColor2.green * b + 511) shr 10;
+  result.blue := (FColor1.blue * b2 + FColor2.blue * b + 511) shr 10;
+  result.alpha := (FColor1.alpha * b2 + FColor2.alpha * b + 511) shr 10;
 end;
 
-function TBGRASimpleGradientWithoutGammaCorrection.GetColorAtF(position: single): TBGRAPixel;
-begin
-  if position <= 0 then
-    result := FColor1 else
-  if position >= 1 then
-    result := FColor2 else
-    result := GetColorAt(round(position*65536));
-end;
-
-function TBGRASimpleGradientWithoutGammaCorrection.GetExpandedColorAt(
-  position: integer): TExpandedPixel;
+function TBGRASimpleGradientWithoutGammaCorrection.InterpolateToExpanded(
+  position: word): TExpandedPixel;
 var b,b2: cardinal;
     rw,gw,bw: word;
 begin
-  if position <= 0 then
-    result := ec1 else
-  if position >= 65536 then
-    result := ec2 else
-  begin
-    b      := position shr 6;
-    b2     := 1024-b;
-    rw  := (FColor1.red * b2 + FColor2.red * b + 511) shr 2;
-    gw := (FColor1.green * b2 + FColor2.green * b + 511) shr 2;
-    bw := (FColor1.blue * b2 + FColor2.blue * b + 511) shr 2;
+  b      := position shr 6;
+  b2     := 1024-b;
+  rw  := (FColor1.red * b2 + FColor2.red * b + 511) shr 2;
+  gw := (FColor1.green * b2 + FColor2.green * b + 511) shr 2;
+  bw := (FColor1.blue * b2 + FColor2.blue * b + 511) shr 2;
 
+  if rw >= $ff00 then
+    result.red := 65535
+  else
     result.red := (GammaExpansionTab[rw shr 8]*NativeUInt(255 - (rw and 255)) + GammaExpansionTab[(rw shr 8)+1]*NativeUInt(rw and 255)) shr 8;
+
+  if gw >= $ff00 then
+    result.green := 65535
+  else
     result.green := (GammaExpansionTab[gw shr 8]*NativeUInt(255 - (gw and 255)) + GammaExpansionTab[(gw shr 8)+1]*NativeUInt(gw and 255)) shr 8;
+
+  if bw >= $ff00 then
+    result.blue := 65535
+  else
     result.blue := (GammaExpansionTab[bw shr 8]*NativeUInt(255 - (bw and 255)) + GammaExpansionTab[(bw shr 8)+1]*NativeUInt(bw and 255)) shr 8;
-    result.alpha := (FColor1.alpha * b2 + FColor2.alpha * b + 511) shr 2;
-  end;
+
+  result.alpha := (FColor1.alpha * b2 + FColor2.alpha * b + 511) shr 2;
 end;
 
-function TBGRASimpleGradientWithoutGammaCorrection.GetExpandedColorAtF(
-  position: single): TExpandedPixel;
+constructor TBGRASimpleGradientWithoutGammaCorrection.Create(Color1,
+  Color2: TBGRAPixel; ARepetition: TBGRAGradientRepetition);
 begin
-  if position <= 0 then
-    result := ec1 else
-  if position >= 1 then
-    result := ec2 else
-    result := GetExpandedColorAt(round(position*65536));
+  inherited Create(Color1,Color2,ARepetition);
 end;
 
-function TBGRASimpleGradientWithoutGammaCorrection.GetAverageColor: TBGRAPixel;
+constructor TBGRASimpleGradientWithoutGammaCorrection.Create(Color1,
+  Color2: TExpandedPixel; ARepetition: TBGRAGradientRepetition);
 begin
-  result := MergeBGRA(FColor1,FColor2);
-end;
-
-function TBGRASimpleGradientWithoutGammaCorrection.GetMonochrome: boolean;
-begin
-  Result:= (FColor1 = FColor2);
+  inherited Create(Color1,Color2,ARepetition);
 end;
 
 { TBGRAGradientTriangleScanner }
@@ -945,179 +1006,447 @@ end;
 
 { TBGRAGradientScanner }
 
-procedure TBGRAGradientScanner.Init(gtype: TGradientType; o1, o2: TPointF;
-  Sinus: Boolean);
+procedure TBGRAGradientScanner.SetTransform(AValue: TAffineMatrix);
 begin
-  FGradientType:= gtype;
-  FOrigin1 := o1;
-  FOrigin2 := o2;
-  FSinus := Sinus;
-
-  //compute vector
-  u.x := o2.x - o1.x;
-  u.y := o2.y - o1.y;
-  len := sqrt(sqr(u.x) + sqr(u.y));
-  if len <> 0 then
-  begin
-    u.x /= len;
-    u.y /= len;
-    aFactor := 65536/len;
-    aFactorF := 1/len;
-  end
-  else
-  begin
-    aFactor := 0;
-    aFactorF := 0;
-  end;
-
-  FVertical := (((gtype =gtLinear) or (gtype=gtReflected)) and (o1.x=o2.x)) or FGradient.Monochrome;
-  mergedColor := FGradient.GetAverageColor;
-  mergedExpandedColor := FGradient.GetAverageExpandedColor;
+  if FTransform=AValue then Exit;
+  FTransform:=AValue;
+  InitTransform;
 end;
 
-procedure TBGRAGradientScanner.InitScanInline(x, y: integer);
-var p: TPointF;
+constructor TBGRAGradientScanner.Create(AGradientType: TGradientType; AOrigin, d1: TPointF);
 begin
-  p.x := X - FOrigin1.x;
-  p.y := Y - FOrigin1.y;
-  FDotProduct := p.x * u.x + p.y * u.y;
-  FDotProductPerp := p.x * u.y - p.y * u.x;
+  FGradient := nil;
+  SetGradient(BGRABlack,BGRAWhite,False);
+  Init(AGradientType,AOrigin,d1,AffineMatrixIdentity,False);
+end;
+
+constructor TBGRAGradientScanner.Create(AGradientType: TGradientType; AOrigin, d1,d2: TPointF);
+begin
+  FGradient := nil;
+  SetGradient(BGRABlack,BGRAWhite,False);
+  Init(AGradientType,AOrigin,d1,d2,AffineMatrixIdentity,False);
+end;
+
+constructor TBGRAGradientScanner.Create(AOrigin,
+  d1, d2, AFocal: TPointF; ARadiusRatio: single; AFocalRadiusRatio: single);
+var
+  m, mInv: TAffineMatrix;
+  focalInv: TPointF;
+begin
+  FGradient := nil;
+  SetGradient(BGRABlack,BGRAWhite,False);
+
+  m := AffineMatrix((d1-AOrigin).x, (d2-AOrigin).x, AOrigin.x,
+                    (d1-AOrigin).y, (d2-AOrigin).y, AOrigin.y);
+  if IsAffineMatrixInversible(m) then
+  begin
+    mInv := AffineMatrixInverse(m);
+    focalInv := mInv*AFocal;
+  end else
+    focalInv := PointF(0,0);
+
+  Init(PointF(0,0), ARadiusRatio, focalInv, AFocalRadiusRatio, AffineMatrixIdentity, m);
+end;
+
+constructor TBGRAGradientScanner.Create(AOrigin: TPointF; ARadius: single;
+  AFocal: TPointF; AFocalRadius: single);
+begin
+  FGradient := nil;
+  SetGradient(BGRABlack,BGRAWhite,False);
+
+  Init(AOrigin, ARadius, AFocal, AFocalRadius, AffineMatrixIdentity, AffineMatrixIdentity);
+end;
+
+procedure TBGRAGradientScanner.SetFlipGradient(AValue: boolean);
+begin
+  if FFlipGradient=AValue then Exit;
+  FFlipGradient:=AValue;
+end;
+
+function TBGRAGradientScanner.GetGradientColor(a: single): TBGRAPixel;
+begin
+  if a = EmptySingle then
+    result := BGRAPixelTransparent
+  else
+  begin
+    if FFlipGradient then a := 1-a;
+    if FSinus then
+    begin
+      a := a*65536;
+      if (a <= low(int64)) or (a >= high(int64)) then
+        result := FAverageColor
+      else
+        result := FGradient.GetColorAt(Sin65536(round(a) and 65535));
+    end else
+      result := FGradient.GetColorAtF(a);
+  end;
+end;
+
+function TBGRAGradientScanner.GetGradientExpandedColor(a: single): TExpandedPixel;
+begin
+  if a = EmptySingle then
+    QWord(result) := 0
+  else
+  begin
+    if FFlipGradient then a := 1-a;
+    if FSinus then
+    begin
+      a *= 65536;
+      if (a <= low(int64)) or (a >= high(int64)) then
+        result := FAverageExpandedColor
+      else
+        result := FGradient.GetExpandedColorAt(Sin65536(round(a) and 65535));
+    end else
+      result := FGradient.GetExpandedColorAtF(a);
+  end;
+end;
+
+procedure TBGRAGradientScanner.Init(AGradientType: TGradientType; AOrigin, d1: TPointF;
+  ATransform: TAffineMatrix; Sinus: Boolean);
+var d2: TPointF;
+begin
+  with (d1-AOrigin) do
+    d2 := PointF(AOrigin.x+y,AOrigin.y-x);
+  Init(AGradientType,AOrigin,d1,d2,ATransform,Sinus);
+end;
+
+procedure TBGRAGradientScanner.Init(AGradientType: TGradientType; AOrigin, d1, d2: TPointF;
+  ATransform: TAffineMatrix; Sinus: Boolean);
+begin
+  FGradientType:= AGradientType;
+  FFlipGradient:= false;
+  FOrigin := AOrigin;
+  FDir1 := d1;
+  FDir2 := d2;
+  FSinus := Sinus;
+  FTransform := ATransform;
+  FHiddenTransform := AffineMatrixIdentity;
+
+  FRadius := 1;
+  FRelativeFocal := PointF(0,0);
+  FFocalRadius := 0;
+
+  InitGradientType;
+  InitTransform;
+end;
+
+procedure TBGRAGradientScanner.Init(AOrigin: TPointF; ARadius: single;
+  AFocal: TPointF; AFocalRadius: single; ATransform: TAffineMatrix; AHiddenTransform: TAffineMatrix);
+var maxRadius: single;
+begin
+  FGradientType:= gtRadial;
+  FFlipGradient:= false;
+  FOrigin := AOrigin;
+  ARadius := abs(ARadius);
+  AFocalRadius := abs(AFocalRadius);
+  maxRadius := max(ARadius,AFocalRadius);
+  FDir1 := AOrigin+PointF(maxRadius,0);
+  FDir2 := AOrigin+PointF(0,maxRadius);
+  FSinus := False;
+  FTransform := ATransform;
+  FHiddenTransform := AHiddenTransform;
+
+  FRadius := ARadius/maxRadius;
+  FRelativeFocal := (AFocal - AOrigin)*(1/maxRadius);
+  FFocalRadius := AFocalRadius/maxRadius;
+
+  InitGradientType;
+  InitTransform;
+end;
+
+procedure TBGRAGradientScanner.InitGradientType;
+begin
+  case FGradientType of
+    gtReflected: begin
+      FScanNextFunc:= @ScanNextReflected;
+      FScanAtFunc:= @ScanAtReflected;
+    end;
+    gtDiamond: begin
+      FScanNextFunc:= @ScanNextDiamond;
+      FScanAtFunc:= @ScanAtDiamond;
+    end;
+    gtRadial: if (FRelativeFocal.x = 0) and (FRelativeFocal.y = 0) then
+    begin
+      if (FFocalRadius = 0) and (FRadius = 1) then
+      begin
+        FScanNextFunc:= @ScanNextRadial;
+        FScanAtFunc:= @ScanAtRadial;
+      end else
+      begin
+        FScanNextFunc:= @ScanNextRadial2;
+        FScanAtFunc:= @ScanAtRadial2;
+      end;
+    end else
+    begin
+      FScanNextFunc:= @ScanNextRadialFocal;
+      FScanAtFunc:= @ScanAtRadialFocal;
+
+      FFocalDirection := FRelativeFocal;
+      FFocalDistance := VectLen(FFocalDirection);
+      if FFocalDistance > 0 then FFocalDirection *= 1/FFocalDistance;
+      FFocalNormal := PointF(-FFocalDirection.y,FFocalDirection.x);
+      FRadialDenominator := sqr(FRadius-FFocalRadius)-sqr(FFocalDistance);
+
+      //case in which the second circle is bigger and the first circle is within the second
+      if (FRadius < FFocalRadius) and (FFocalDistance <= FFocalRadius-FRadius) then
+        FRadialDeltaSign := -1
+      else
+        FRadialDeltaSign := 1;
+
+      //clipping afer the apex
+      if (FFocalRadius < FRadius) and (FFocalDistance > FRadius-FFocalRadius) then
+      begin
+        maxW1 := FRadius/(FRadius-FFocalRadius)*FFocalDistance;
+        maxW2 := MaxSingle;
+      end else
+      if (FRadius < FFocalRadius) and (FFocalDistance > FFocalRadius-FRadius) then
+      begin
+        maxW1 := MaxSingle;
+        maxW2 := FFocalRadius/(FFocalRadius-FRadius)*FFocalDistance;
+      end else
+      begin
+        maxW1 := MaxSingle;
+        maxW2 := MaxSingle;
+      end;
+    end;
+  else
+    {gtLinear:} begin
+      FScanNextFunc:= @ScanNextLinear;
+      FScanAtFunc:= @ScanAtLinear;
+    end;
+  end;
+end;
+
+procedure TBGRAGradientScanner.SetGradient(c1, c2: TBGRAPixel;
+  AGammaCorrection: boolean);
+begin
+  if Assigned(FGradient) and FGradientOwner then FreeAndNil(FGradient);
+
+  //transparent pixels have no color so
+  //take it from other color
+  if c1.alpha = 0 then c1 := BGRA(c2.red,c2.green,c2.blue,0);
+  if c2.alpha = 0 then c2 := BGRA(c1.red,c1.green,c1.blue,0);
+
+  if AGammaCorrection then
+    FGradient := TBGRASimpleGradientWithGammaCorrection.Create(c1,c2)
+  else
+    FGradient := TBGRASimpleGradientWithoutGammaCorrection.Create(c1,c2);
+  FGradientOwner := true;
+  InitGradient;
+end;
+
+procedure TBGRAGradientScanner.SetGradient(AGradient: TBGRACustomGradient;
+  AOwner: boolean);
+begin
+  if Assigned(FGradient) and FGradientOwner then FreeAndNil(FGradient);
+  FGradient := AGradient;
+  FGradientOwner := AOwner;
+  InitGradient;
+end;
+
+procedure TBGRAGradientScanner.InitTransform;
+var u,v: TPointF;
+begin
+  u := FDir1-FOrigin;
+  if FGradientType in[gtLinear,gtReflected] then
+    v := PointF(u.y, -u.x)
+  else
+    v := FDir2-FOrigin;
+
+  FMatrix := FTransform * FHiddenTransform * AffineMatrix(u.x, v.x, FOrigin.x,
+                                                          u.y, v.y, FOrigin.y);
+  if IsAffineMatrixInversible(FMatrix) then
+  begin
+    FMatrix := AffineMatrixInverse(FMatrix);
+    FIsAverage:= false;
+  end else
+  begin
+    FMatrix := AffineMatrixIdentity;
+    FIsAverage:= true;
+  end;
+
+  case FGradientType of
+    gtReflected: FRepeatHoriz := (u.x=0);
+    gtDiamond: FRepeatHoriz:= FIsAverage;
+    gtRadial: begin
+      if FFocalRadius = FRadius then FIsAverage:= true;
+      FRepeatHoriz:= FIsAverage;
+    end
+  else
+    {gtLinear:} FRepeatHoriz := (u.x=0);
+  end;
+
+  if FGradient.Monochrome then
+  begin
+    FRepeatHoriz:= true;
+    FIsAverage:= true;
+  end;
+
+  FPosition := PointF(0,0);
+end;
+
+procedure TBGRAGradientScanner.InitGradient;
+begin
+  FAverageColor := FGradient.GetAverageColor;
+  FAverageExpandedColor := FGradient.GetAverageExpandedColor;
+end;
+
+function TBGRAGradientScanner.ComputeRadialFocal(const p: TPointF): single;
+var
+  w1,w2,h,d1,d2,delta,num: single;
+begin
+  w1 := p*FFocalDirection;
+  w2 := FFocalDistance-w1;
+  if (w1 < maxW1) and (w2 < maxW2) then
+  begin
+    //vertical position and distances
+    h := sqr(p*FFocalNormal);
+    d1 := sqr(w1)+h;
+    d2 := sqr(w2)+h;
+    //finding t
+    delta := sqr(FFocalRadius)*d1 + 2*FRadius*FFocalRadius*(p*(FRelativeFocal-p))+
+             sqr(FRadius)*d2 - sqr(VectDet(p,FRelativeFocal));
+    if delta >= 0 then
+    begin
+      num := -FFocalRadius*(FRadius-FFocalRadius)-(FRelativeFocal*(FRelativeFocal-p));
+      result := (num+FRadialDeltaSign*sqrt(delta))/FRadialDenominator;
+    end else
+      result := EmptySingle;
+  end else
+    result := EmptySingle;
+end;
+
+function TBGRAGradientScanner.ScanNextLinear: single;
+begin
+  result := FPosition.x;
+end;
+
+function TBGRAGradientScanner.ScanNextReflected: single;
+begin
+  result := abs(FPosition.x);
+end;
+
+function TBGRAGradientScanner.ScanNextDiamond: single;
+begin
+  result := max(abs(FPosition.x), abs(FPosition.y));
+end;
+
+function TBGRAGradientScanner.ScanNextRadial: single;
+begin
+  result := sqrt(sqr(FPosition.x) + sqr(FPosition.y));
+end;
+
+function TBGRAGradientScanner.ScanNextRadial2: single;
+begin
+  result := (sqrt(sqr(FPosition.x) + sqr(FPosition.y))-FFocalRadius)/(FRadius-FFocalRadius);
+end;
+
+function TBGRAGradientScanner.ScanNextRadialFocal: single;
+begin
+  result := ComputeRadialFocal(FPosition);
+end;
+
+function TBGRAGradientScanner.ScanAtLinear(const p: TPointF): single;
+begin
+  with (FMatrix*p) do
+    result := x;
+end;
+
+function TBGRAGradientScanner.ScanAtReflected(const p: TPointF): single;
+begin
+  with (FMatrix*p) do
+    result := abs(x);
+end;
+
+function TBGRAGradientScanner.ScanAtDiamond(const p: TPointF): single;
+begin
+  with (FMatrix*p) do
+    result := max(abs(x), abs(y));
+end;
+
+function TBGRAGradientScanner.ScanAtRadial(const p: TPointF): single;
+begin
+  with (FMatrix*p) do
+    result := sqrt(sqr(x) + sqr(y));
+end;
+
+function TBGRAGradientScanner.ScanAtRadial2(const p: TPointF): single;
+begin
+  with (FMatrix*p) do
+    result := (sqrt(sqr(x) + sqr(y))-FFocalRadius)/(FRadius-FFocalRadius);
+end;
+
+function TBGRAGradientScanner.ScanAtRadialFocal(const p: TPointF): single;
+begin
+  result := ComputeRadialFocal(FMatrix*p);
 end;
 
 function TBGRAGradientScanner.ScanNextInline: TBGRAPixel;
-var
-  a,a2: single;
-  ai: integer;
 begin
-  if FGradientType >= gtDiamond then
+  if FIsAverage then
+    result := FAverageColor
+  else
   begin
-    if FGradientType = gtRadial then
-    begin
-      a := sqrt(sqr(FDotProduct) + sqr(FDotProductPerp));
-      FDotProduct += u.x;
-      FDotProductPerp += u.y;
-    end else
-    begin
-      a   := abs(FDotProduct);
-      a2  := abs(FDotProductPerp);
-      if a2 > a then a := a2;
-      FDotProduct += u.x;
-      FDotProductPerp += u.y;
-    end;
-  end else
-  if FGradientType = gtReflected then
-  begin
-    a := abs(FDotProduct);
-    FDotProduct += u.x;
-  end else
-  begin
-    a := FDotProduct;
-    FDotProduct += u.x;
+    result := GetGradientColor(FScanNextFunc());
+    FPosition += PointF(FMatrix[1,1],FMatrix[2,1]);
   end;
-
-  if FSinus then
-  begin
-    a *= aFactor;
-    if a <= low(int64) then
-      result := FGradient.GetAverageColor
-    else
-    if a >= high(int64) then
-      result := FGradient.GetAverageColor
-    else
-    begin
-      ai := Sin65536(round(a));
-      result := FGradient.GetColorAt(ai);
-    end;
-  end else
-    result := FGradient.GetColorAtF(a*aFactorF);
 end;
 
 function TBGRAGradientScanner.ScanNextExpandedInline: TExpandedPixel;
-var
-  a,a2: single;
-  ai: integer;
 begin
-  if FGradientType >= gtDiamond then
+  if FIsAverage then
+    result := FAverageExpandedColor
+  else
   begin
-    if FGradientType = gtRadial then
-    begin
-      a := sqrt(sqr(FDotProduct) + sqr(FDotProductPerp));
-      FDotProduct += u.x;
-      FDotProductPerp += u.y;
-    end else
-    begin
-      a   := abs(FDotProduct);
-      a2  := abs(FDotProductPerp);
-      if a2 > a then a := a2;
-      FDotProduct += u.x;
-      FDotProductPerp += u.y;
-    end;
-  end else
-  if FGradientType = gtReflected then
-  begin
-    a := abs(FDotProduct);
-    FDotProduct += u.x;
-  end else
-  begin
-    a := FDotProduct;
-    FDotProduct += u.x;
+    result := GetGradientExpandedColor(FScanNextFunc());
+    FPosition += PointF(FMatrix[1,1],FMatrix[2,1]);
   end;
-
-  if FSinus then
-  begin
-    a *= aFactor;
-    if a <= low(int64) then
-      result := FGradient.GetAverageExpandedColor
-    else
-    if a >= high(int64) then
-      result := FGradient.GetAverageExpandedColor
-    else
-    begin
-      ai := Sin65536(round(a));
-      result := FGradient.GetExpandedColorAt(ai);
-    end;
-  end else
-    result := FGradient.GetExpandedColorAtF(a*aFactorF);
 end;
 
 constructor TBGRAGradientScanner.Create(c1, c2: TBGRAPixel;
-  gtype: TGradientType; o1, o2: TPointF; gammaColorCorrection: boolean;
+  AGradientType: TGradientType; AOrigin, d1: TPointF; gammaColorCorrection: boolean;
   Sinus: Boolean);
 begin
-  //transparent pixels have no color so
-  //take it from other color
-  if c1.alpha = 0 then
-  begin
-    c1.red   := c2.red;
-    c1.green := c2.green;
-    c1.blue  := c2.blue;
-  end
-  else
-  if c2.alpha = 0 then
-  begin
-    c2.red   := c1.red;
-    c2.green := c1.green;
-    c2.blue  := c1.blue;
-  end;
+  FGradient := nil;
+  SetGradient(c1,c2,gammaColorCorrection);
+  Init(AGradientType,AOrigin,d1,AffineMatrixIdentity,Sinus);
+end;
 
-  if gammaColorCorrection then
-  begin
-    FGradient := TBGRASimpleGradientWithGammaCorrection.Create(c1,c2);
-    FGradientOwner := true;
-  end else
-  begin
-    FGradient := TBGRASimpleGradientWithoutGammaCorrection.Create(c1,c2);
-    FGradientOwner := true;
-  end;
-  Init(gtype,o1,o2,Sinus);
+constructor TBGRAGradientScanner.Create(c1, c2: TBGRAPixel;
+  AGradientType: TGradientType; AOrigin, d1, d2: TPointF; gammaColorCorrection: boolean;
+  Sinus: Boolean);
+begin
+  FGradient := nil;
+  if AGradientType in[gtLinear,gtReflected] then raise EInvalidArgument.Create('Two directions are not required for linear and reflected gradients');
+  SetGradient(c1,c2,gammaColorCorrection);
+  Init(AGradientType,AOrigin,d1,d2,AffineMatrixIdentity,Sinus);
 end;
 
 constructor TBGRAGradientScanner.Create(gradient: TBGRACustomGradient;
-  gtype: TGradientType; o1, o2: TPointF; Sinus: Boolean; AGradientOwner: Boolean=False);
+  AGradientType: TGradientType; AOrigin, d1: TPointF; Sinus: Boolean; AGradientOwner: Boolean=False);
 begin
   FGradient := gradient;
   FGradientOwner := AGradientOwner;
-  Init(gtype,o1,o2,Sinus);
+  Init(AGradientType,AOrigin,d1,AffineMatrixIdentity,Sinus);
+end;
+
+constructor TBGRAGradientScanner.Create(gradient: TBGRACustomGradient;
+  AGradientType: TGradientType; AOrigin, d1, d2: TPointF; Sinus: Boolean;
+  AGradientOwner: Boolean);
+begin
+  if AGradientType in[gtLinear,gtReflected] then raise EInvalidArgument.Create('Two directions are not required for linear and reflected gradients');
+  FGradient := gradient;
+  FGradientOwner := AGradientOwner;
+  Init(AGradientType,AOrigin,d1,d2,AffineMatrixIdentity,Sinus);
+end;
+
+constructor TBGRAGradientScanner.Create(gradient: TBGRACustomGradient;
+  AOrigin: TPointF; ARadius: single; AFocal: TPointF; AFocalRadius: single;
+  AGradientOwner: Boolean);
+begin
+  FGradient := gradient;
+  FGradientOwner := AGradientOwner;
+  Init(AOrigin, ARadius, AFocal, AFocalRadius, AffineMatrixIdentity, AffineMatrixIdentity);
 end;
 
 destructor TBGRAGradientScanner.Destroy;
@@ -1129,8 +1458,8 @@ end;
 
 procedure TBGRAGradientScanner.ScanMoveTo(X, Y: Integer);
 begin
-  InitScanInline(X,Y);
-  if FVertical then
+  FPosition := FMatrix*PointF(x,y);
+  if FRepeatHoriz then
   begin
     FHorizColor := ScanNextInline;
     FHorizExpandedColor := ScanNextExpandedInline;
@@ -1139,7 +1468,7 @@ end;
 
 function TBGRAGradientScanner.ScanNextPixel: TBGRAPixel;
 begin
-  if FVertical then
+  if FRepeatHoriz then
     result := FHorizColor
   else
     result := ScanNextInline;
@@ -1147,98 +1476,35 @@ end;
 
 function TBGRAGradientScanner.ScanNextExpandedPixel: TExpandedPixel;
 begin
-  if FVertical then
+  if FRepeatHoriz then
     result := FHorizExpandedColor
   else
     result := ScanNextExpandedInline;
 end;
 
 function TBGRAGradientScanner.ScanAt(X, Y: Single): TBGRAPixel;
-var p: TPointF;
-    a,a2: single;
-    ai: integer;
 begin
-  if len = 0 then
-  begin
-    result := mergedColor;
-    exit;
-  end;
-
-  p.x := X - FOrigin1.x;
-  p.y := Y - FOrigin1.y;
-  case FGradientType of
-    gtLinear:    a := p.x * u.x + p.y * u.y;
-    gtReflected: a := abs(p.x * u.x + p.y * u.y);
-    gtDiamond:
-        begin
-          a   := abs(p.x * u.x + p.y * u.y);
-          a2  := abs(p.x * u.y - p.y * u.x);
-          if a2 > a then a := a2;
-        end;
-    gtRadial:    a := sqrt(sqr(p.x * u.x + p.y * u.y) + sqr(p.x * u.y - p.y * u.x));
-  end;
-
-  if FSinus then
-  begin
-    a := a*aFactor;
-    if (a <= low(int64)) or (a >= high(int64)) then
-      result := mergedColor
-    else
-    begin
-      ai := Sin65536(round(a));
-      result := FGradient.GetColorAt(ai);
-    end;
-  end else
-    result := FGradient.GetColorAtF(a*aFactorF);
+  if FIsAverage then
+    result := FAverageColor
+  else
+    result := GetGradientColor(FScanAtFunc(PointF(X,Y)));
 end;
 
 function TBGRAGradientScanner.ScanAtExpanded(X, Y: Single): TExpandedPixel;
-var p: TPointF;
-    a,a2: single;
-    ai: integer;
 begin
-  if len = 0 then
-  begin
-    result := mergedExpandedColor;
-    exit;
-  end;
-
-  p.x := X - FOrigin1.x;
-  p.y := Y - FOrigin1.y;
-  case FGradientType of
-    gtLinear:    a := p.x * u.x + p.y * u.y;
-    gtReflected: a := abs(p.x * u.x + p.y * u.y);
-    gtDiamond:
-        begin
-          a   := abs(p.x * u.x + p.y * u.y);
-          a2  := abs(p.x * u.y - p.y * u.x);
-          if a2 > a then a := a2;
-        end;
-    gtRadial:    a := sqrt(sqr(p.x * u.x + p.y * u.y) + sqr(p.x * u.y - p.y * u.x));
-  end;
-
-  if FSinus then
-  begin
-    a := a*aFactor;
-    if (a <= low(int64)) or (a >= high(int64)) then
-      result := mergedExpandedColor
-    else
-    begin
-      ai := Sin65536(round(a));
-      result := FGradient.GetExpandedColorAt(ai);
-    end;
-  end else
-    result := FGradient.GetExpandedColorAtF(a*aFactorF);
+  if FIsAverage then
+    result := FAverageExpandedColor
+  else
+    result := GetGradientExpandedColor(FScanAtFunc(PointF(X,Y)));
 end;
 
 procedure TBGRAGradientScanner.ScanPutPixels(pdest: PBGRAPixel; count: integer;
   mode: TDrawMode);
 var c: TBGRAPixel;
 begin
-  if FVertical or (len = 0) then
+  if FRepeatHoriz then
   begin
-    if FVertical then c := FHorizColor
-      else c := mergedColor;
+    c := FHorizColor;
     case mode of
       dmDrawWithTransparency: DrawPixelsInline(pdest,c,count);
       dmLinearBlend: FastBlendPixelsInline(pdest,c,count);

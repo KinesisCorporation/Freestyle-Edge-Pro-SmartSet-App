@@ -30,8 +30,9 @@ interface
 
 uses
   {$ifdef Win32}Windows, {$endif}
-  {$ifdef Darwin}LCLIntf, lcltype, MacOSAll, CarbonUtils, CarbonDef, CarbonProc, {$endif}
-  SysUtils, {$ifdef fpc} LMessages {$else} messages {$endif}, Classes, Graphics, Controls, Forms, ImgList, ActnList, HSButtons;
+  {$ifdef Darwin}MacOSAll, CarbonUtils, CarbonDef, CarbonProc, {$endif}
+  SysUtils, {$ifdef fpc} LMessages {$else} messages {$endif}, Classes, Graphics, Controls, Forms, ImgList, ActnList, HSButtons,
+  LCLIntf, LCLType;
 
 type
    THSSpeedButton = class(TGraphicControl)
@@ -148,6 +149,7 @@ type
       property Index: integer read FIndex write FIndex;
       property TransparentColor: TColor read FTransparentColor write FTransparentColor default clFuchsia;
 
+      property OnPaint;
       property OnClick;
 //      property OnDblClick;
       property OnMouseDown;

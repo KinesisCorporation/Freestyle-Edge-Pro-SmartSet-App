@@ -28,8 +28,7 @@ interface
 
 uses
   {$ifdef Win32}Windows, {$endif}
-  {$ifdef Darwin}LCLIntf, lcltype, {$endif}
-  sysutils, ExtCtrls, Graphics, Classes {$ifdef FPC}, GraphType, IntfGraphics {$endif},Dialogs;
+  sysutils, ExtCtrls, Graphics, Classes {$ifdef FPC}, GraphType, IntfGraphics {$endif},Dialogs, LCLIntf, LCLType;
 
 const
    cHotTrackSteps = 8;

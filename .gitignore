@@ -1,0 +1,14 @@
+Components/richmemo/lib/i386-win32/richmemopackage.compiled
+*.ppu
+*.o
+*.bak
+*.ex_
+*.compiled
+Versions/
+SmartSet FSEdge/SmartSetFSEdge.exe
+SmartSet FSEdge/FS Edge SmartSet App (Win).exe
+SmartSet FSEdge/SmartSet App-Freestyle (PC).exe
+backup/*
+backup
+lib
+debug
