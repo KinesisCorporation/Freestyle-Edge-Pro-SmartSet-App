@@ -22,7 +22,7 @@ object FormMain: TFormMain
   OnKeyUp = FormKeyUp
   OnPaint = FormPaint
   Position = poScreenCenter
-  LCLVersion = '1.8.4.0'
+  LCLVersion = '2.0.0.4'
   object pnlMain: TPanel
     Left = 2
     Height = 711
@@ -5835,6 +5835,7 @@ object FormMain: TFormMain
             Index = 0
             CornerSize = 10
             BorderWidth = 0
+            Opaque = False
           end
           object LabelBox4: TLabelBox
             Left = 137
@@ -5862,6 +5863,7 @@ object FormMain: TFormMain
             Index = 2
             CornerSize = 10
             BorderWidth = 0
+            Opaque = False
           end
           object LabelBox3: TLabelBox
             Left = 101
@@ -5889,6 +5891,7 @@ object FormMain: TFormMain
             Index = 1
             CornerSize = 10
             BorderWidth = 0
+            Opaque = False
           end
           object pnlLayers: TPanel
             Left = 762
@@ -6223,6 +6226,7 @@ object FormMain: TFormMain
             Index = 3
             CornerSize = 10
             BorderWidth = 0
+            Opaque = False
           end
           object LabelBox6: TLabelBox
             Left = 209
@@ -6250,6 +6254,7 @@ object FormMain: TFormMain
             Index = 4
             CornerSize = 10
             BorderWidth = 0
+            Opaque = False
           end
           object LabelBox7: TLabelBox
             Left = 245
@@ -6277,6 +6282,7 @@ object FormMain: TFormMain
             Index = 5
             CornerSize = 10
             BorderWidth = 0
+            Opaque = False
           end
           object LabelBox8: TLabelBox
             Left = 281
@@ -6304,6 +6310,7 @@ object FormMain: TFormMain
             Index = 6
             CornerSize = 10
             BorderWidth = 0
+            Opaque = False
           end
           object LabelBox9: TLabelBox
             Left = 317
@@ -6331,6 +6338,7 @@ object FormMain: TFormMain
             Index = 7
             CornerSize = 10
             BorderWidth = 0
+            Opaque = False
           end
           object LabelBox10: TLabelBox
             Left = 426
@@ -6358,6 +6366,7 @@ object FormMain: TFormMain
             Index = 8
             CornerSize = 10
             BorderWidth = 0
+            Opaque = False
           end
           object LabelBox11: TLabelBox
             Left = 462
@@ -6385,6 +6394,7 @@ object FormMain: TFormMain
             Index = 9
             CornerSize = 10
             BorderWidth = 0
+            Opaque = False
           end
           object LabelBox12: TLabelBox
             Left = 498
@@ -6412,6 +6422,7 @@ object FormMain: TFormMain
             Index = 10
             CornerSize = 10
             BorderWidth = 0
+            Opaque = False
           end
           object LabelBox13: TLabelBox
             Left = 534
@@ -6439,6 +6450,7 @@ object FormMain: TFormMain
             Index = 11
             CornerSize = 10
             BorderWidth = 0
+            Opaque = False
           end
           object LabelBox14: TLabelBox
             Left = 570
@@ -6466,6 +6478,7 @@ object FormMain: TFormMain
             Index = 12
             CornerSize = 10
             BorderWidth = 0
+            Opaque = False
           end
           object LabelBox15: TLabelBox
             Left = 606
@@ -6493,6 +6506,7 @@ object FormMain: TFormMain
             Index = 13
             CornerSize = 10
             BorderWidth = 0
+            Opaque = False
           end
           object LabelBox16: TLabelBox
             Left = 642
@@ -6520,6 +6534,7 @@ object FormMain: TFormMain
             Index = 14
             CornerSize = 10
             BorderWidth = 0
+            Opaque = False
           end
           object LabelBox17: TLabelBox
             Left = 678
@@ -6547,6 +6562,7 @@ object FormMain: TFormMain
             Index = 15
             CornerSize = 10
             BorderWidth = 0
+            Opaque = False
           end
           object LabelBox18: TLabelBox
             Left = 714
@@ -6574,6 +6590,7 @@ object FormMain: TFormMain
             Index = 16
             CornerSize = 10
             BorderWidth = 0
+            Opaque = False
           end
           object LabelBox19: TLabelBox
             Left = 101
@@ -6601,6 +6618,7 @@ object FormMain: TFormMain
             Index = 19
             CornerSize = 10
             BorderWidth = 0
+            Opaque = False
           end
           object LabelBox20: TLabelBox
             Left = 137
@@ -6628,6 +6646,7 @@ object FormMain: TFormMain
             Index = 20
             CornerSize = 10
             BorderWidth = 0
+            Opaque = False
           end
           object LabelBox21: TLabelBox
             Left = 173
@@ -6655,6 +6674,7 @@ object FormMain: TFormMain
             Index = 21
             CornerSize = 10
             BorderWidth = 0
+            Opaque = False
           end
           object LabelBox22: TLabelBox
             Left = 209
@@ -6682,6 +6702,7 @@ object FormMain: TFormMain
             Index = 22
             CornerSize = 10
             BorderWidth = 0
+            Opaque = False
           end
           object LabelBox23: TLabelBox
             Left = 245
@@ -6709,6 +6730,7 @@ object FormMain: TFormMain
             Index = 23
             CornerSize = 10
             BorderWidth = 0
+            Opaque = False
           end
           object LabelBox24: TLabelBox
             Left = 281
@@ -6736,6 +6758,7 @@ object FormMain: TFormMain
             Index = 24
             CornerSize = 10
             BorderWidth = 0
+            Opaque = False
           end
           object LabelBox25: TLabelBox
             Left = 317
@@ -6763,6 +6786,7 @@ object FormMain: TFormMain
             Index = 25
             CornerSize = 10
             BorderWidth = 0
+            Opaque = False
           end
           object LabelBox26: TLabelBox
             Left = 426
@@ -6790,6 +6814,7 @@ object FormMain: TFormMain
             Index = 26
             CornerSize = 10
             BorderWidth = 0
+            Opaque = False
           end
           object LabelBox27: TLabelBox
             Left = 462
@@ -6817,6 +6842,7 @@ object FormMain: TFormMain
             Index = 27
             CornerSize = 10
             BorderWidth = 0
+            Opaque = False
           end
           object LabelBox28: TLabelBox
             Left = 498
@@ -6844,6 +6870,7 @@ object FormMain: TFormMain
             Index = 28
             CornerSize = 10
             BorderWidth = 0
+            Opaque = False
           end
           object LabelBox29: TLabelBox
             Left = 534
@@ -6871,6 +6898,7 @@ object FormMain: TFormMain
             Index = 29
             CornerSize = 10
             BorderWidth = 0
+            Opaque = False
           end
           object LabelBox30: TLabelBox
             Left = 570
@@ -6898,6 +6926,7 @@ object FormMain: TFormMain
             Index = 30
             CornerSize = 10
             BorderWidth = 0
+            Opaque = False
           end
           object LabelBox31: TLabelBox
             Left = 606
@@ -6925,6 +6954,7 @@ object FormMain: TFormMain
             Index = 31
             CornerSize = 10
             BorderWidth = 0
+            Opaque = False
           end
           object LabelBox32: TLabelBox
             Left = 642
@@ -6952,6 +6982,7 @@ object FormMain: TFormMain
             Index = 32
             CornerSize = 10
             BorderWidth = 0
+            Opaque = False
           end
           object LabelBox33: TLabelBox
             Left = 154
@@ -6979,6 +7010,7 @@ object FormMain: TFormMain
             Index = 37
             CornerSize = 10
             BorderWidth = 0
+            Opaque = False
           end
           object LabelBox34: TLabelBox
             Left = 190
@@ -7006,6 +7038,7 @@ object FormMain: TFormMain
             Index = 38
             CornerSize = 10
             BorderWidth = 0
+            Opaque = False
           end
           object LabelBox35: TLabelBox
             Left = 226
@@ -7033,6 +7066,7 @@ object FormMain: TFormMain
             Index = 39
             CornerSize = 10
             BorderWidth = 0
+            Opaque = False
           end
           object LabelBox36: TLabelBox
             Left = 262
@@ -7060,6 +7094,7 @@ object FormMain: TFormMain
             Index = 40
             CornerSize = 10
             BorderWidth = 0
+            Opaque = False
           end
           object LabelBox37: TLabelBox
             Left = 298
@@ -7087,6 +7122,7 @@ object FormMain: TFormMain
             Index = 41
             CornerSize = 10
             BorderWidth = 0
+            Opaque = False
           end
           object LabelBox38: TLabelBox
             Left = 21
@@ -7114,6 +7150,7 @@ object FormMain: TFormMain
             Index = 34
             CornerSize = 10
             BorderWidth = 0
+            Opaque = False
           end
           object LabelBox39: TLabelBox
             Left = 57
@@ -7141,6 +7178,7 @@ object FormMain: TFormMain
             Index = 35
             CornerSize = 10
             BorderWidth = 0
+            Opaque = False
           end
           object LabelBox40: TLabelBox
             Left = 408
@@ -7168,6 +7206,7 @@ object FormMain: TFormMain
             Index = 42
             CornerSize = 10
             BorderWidth = 0
+            Opaque = False
           end
           object LabelBox41: TLabelBox
             Left = 444
@@ -7195,6 +7234,7 @@ object FormMain: TFormMain
             Index = 43
             CornerSize = 10
             BorderWidth = 0
+            Opaque = False
           end
           object LabelBox42: TLabelBox
             Left = 480
@@ -7222,6 +7262,7 @@ object FormMain: TFormMain
             Index = 44
             CornerSize = 10
             BorderWidth = 0
+            Opaque = False
           end
           object LabelBox43: TLabelBox
             Left = 516
@@ -7249,6 +7290,7 @@ object FormMain: TFormMain
             Index = 45
             CornerSize = 10
             BorderWidth = 0
+            Opaque = False
           end
           object LabelBox44: TLabelBox
             Left = 552
@@ -7276,6 +7318,7 @@ object FormMain: TFormMain
             Index = 46
             CornerSize = 10
             BorderWidth = 0
+            Opaque = False
           end
           object LabelBox45: TLabelBox
             Left = 588
@@ -7303,6 +7346,7 @@ object FormMain: TFormMain
             Index = 47
             CornerSize = 10
             BorderWidth = 0
+            Opaque = False
           end
           object LabelBox46: TLabelBox
             Left = 624
@@ -7330,6 +7374,7 @@ object FormMain: TFormMain
             Index = 48
             CornerSize = 10
             BorderWidth = 0
+            Opaque = False
           end
           object LabelBox47: TLabelBox
             Left = 21
@@ -7357,6 +7402,7 @@ object FormMain: TFormMain
             Index = 51
             CornerSize = 10
             BorderWidth = 0
+            Opaque = False
           end
           object LabelBox48: TLabelBox
             Left = 57
@@ -7384,6 +7430,7 @@ object FormMain: TFormMain
             Index = 52
             CornerSize = 10
             BorderWidth = 0
+            Opaque = False
           end
           object LabelBox49: TLabelBox
             Left = 165
@@ -7411,6 +7458,7 @@ object FormMain: TFormMain
             Index = 54
             CornerSize = 10
             BorderWidth = 0
+            Opaque = False
           end
           object LabelBox50: TLabelBox
             Left = 201
@@ -7438,6 +7486,7 @@ object FormMain: TFormMain
             Index = 55
             CornerSize = 10
             BorderWidth = 0
+            Opaque = False
           end
           object LabelBox51: TLabelBox
             Left = 237
@@ -7465,6 +7514,7 @@ object FormMain: TFormMain
             Index = 56
             CornerSize = 10
             BorderWidth = 0
+            Opaque = False
           end
           object LabelBox52: TLabelBox
             Left = 273
@@ -7492,6 +7542,7 @@ object FormMain: TFormMain
             Index = 57
             CornerSize = 10
             BorderWidth = 0
+            Opaque = False
           end
           object LabelBox53: TLabelBox
             Left = 309
@@ -7519,6 +7570,7 @@ object FormMain: TFormMain
             Index = 58
             CornerSize = 10
             BorderWidth = 0
+            Opaque = False
           end
           object LabelBox54: TLabelBox
             Left = 418
@@ -7546,6 +7598,7 @@ object FormMain: TFormMain
             Index = 59
             CornerSize = 10
             BorderWidth = 0
+            Opaque = False
           end
           object LabelBox55: TLabelBox
             Left = 454
@@ -7573,6 +7626,7 @@ object FormMain: TFormMain
             Index = 60
             CornerSize = 10
             BorderWidth = 0
+            Opaque = False
           end
           object LabelBox56: TLabelBox
             Left = 490
@@ -7600,6 +7654,7 @@ object FormMain: TFormMain
             Index = 61
             CornerSize = 10
             BorderWidth = 0
+            Opaque = False
           end
           object LabelBox57: TLabelBox
             Left = 526
@@ -7627,6 +7682,7 @@ object FormMain: TFormMain
             Index = 62
             CornerSize = 10
             BorderWidth = 0
+            Opaque = False
           end
           object LabelBox58: TLabelBox
             Left = 561
@@ -7654,6 +7710,7 @@ object FormMain: TFormMain
             Index = 63
             CornerSize = 10
             BorderWidth = 0
+            Opaque = False
           end
           object LabelBox59: TLabelBox
             Left = 597
@@ -7681,6 +7738,7 @@ object FormMain: TFormMain
             Index = 64
             CornerSize = 10
             BorderWidth = 0
+            Opaque = False
           end
           object LabelBox60: TLabelBox
             Left = 633
@@ -7708,6 +7766,7 @@ object FormMain: TFormMain
             Index = 65
             CornerSize = 10
             BorderWidth = 0
+            Opaque = False
           end
           object LabelBox61: TLabelBox
             Left = 21
@@ -7735,6 +7794,7 @@ object FormMain: TFormMain
             Index = 67
             CornerSize = 10
             BorderWidth = 0
+            Opaque = False
           end
           object LabelBox62: TLabelBox
             Left = 57
@@ -7762,6 +7822,7 @@ object FormMain: TFormMain
             Index = 68
             CornerSize = 10
             BorderWidth = 0
+            Opaque = False
           end
           object LabelBox63: TLabelBox
             Left = 183
@@ -7789,6 +7850,7 @@ object FormMain: TFormMain
             Index = 70
             CornerSize = 10
             BorderWidth = 0
+            Opaque = False
           end
           object LabelBox64: TLabelBox
             Left = 219
@@ -7816,6 +7878,7 @@ object FormMain: TFormMain
             Index = 71
             CornerSize = 10
             BorderWidth = 0
+            Opaque = False
           end
           object LabelBox65: TLabelBox
             Left = 255
@@ -7843,6 +7906,7 @@ object FormMain: TFormMain
             Index = 72
             CornerSize = 10
             BorderWidth = 0
+            Opaque = False
           end
           object LabelBox66: TLabelBox
             Left = 291
@@ -7870,6 +7934,7 @@ object FormMain: TFormMain
             Index = 73
             CornerSize = 10
             BorderWidth = 0
+            Opaque = False
           end
           object LabelBox67: TLabelBox
             Left = 327
@@ -7897,6 +7962,7 @@ object FormMain: TFormMain
             Index = 74
             CornerSize = 10
             BorderWidth = 0
+            Opaque = False
           end
           object LabelBox68: TLabelBox
             Left = 21
@@ -7924,6 +7990,7 @@ object FormMain: TFormMain
             Index = 83
             CornerSize = 10
             BorderWidth = 0
+            Opaque = False
           end
           object LabelBox69: TLabelBox
             Left = 57
@@ -7951,6 +8018,7 @@ object FormMain: TFormMain
             Index = 84
             CornerSize = 10
             BorderWidth = 0
+            Opaque = False
           end
           object LabelBox70: TLabelBox
             Left = 101
@@ -7978,6 +8046,7 @@ object FormMain: TFormMain
             Index = 85
             CornerSize = 10
             BorderWidth = 0
+            Opaque = False
           end
           object LabelBox71: TLabelBox
             Left = 437
@@ -8005,6 +8074,7 @@ object FormMain: TFormMain
             Index = 75
             CornerSize = 10
             BorderWidth = 0
+            Opaque = False
           end
           object LabelBox72: TLabelBox
             Left = 473
@@ -8032,6 +8102,7 @@ object FormMain: TFormMain
             Index = 76
             CornerSize = 10
             BorderWidth = 0
+            Opaque = False
           end
           object LabelBox73: TLabelBox
             Left = 509
@@ -8059,6 +8130,7 @@ object FormMain: TFormMain
             Index = 77
             CornerSize = 10
             BorderWidth = 0
+            Opaque = False
           end
           object LabelBox74: TLabelBox
             Left = 545
@@ -8086,6 +8158,7 @@ object FormMain: TFormMain
             Index = 78
             CornerSize = 10
             BorderWidth = 0
+            Opaque = False
           end
           object LabelBox75: TLabelBox
             Left = 580
@@ -8113,6 +8186,7 @@ object FormMain: TFormMain
             Index = 79
             CornerSize = 10
             BorderWidth = 0
+            Opaque = False
           end
           object LabelBox76: TLabelBox
             Left = 616
@@ -8140,6 +8214,7 @@ object FormMain: TFormMain
             Index = 80
             CornerSize = 10
             BorderWidth = 0
+            Opaque = False
           end
           object LabelBox77: TLabelBox
             Left = 679
@@ -8167,6 +8242,7 @@ object FormMain: TFormMain
             Index = 81
             CornerSize = 10
             BorderWidth = 0
+            Opaque = False
           end
           object LabelBox78: TLabelBox
             Left = 408
@@ -8194,6 +8270,7 @@ object FormMain: TFormMain
             Index = 89
             CornerSize = 10
             BorderWidth = 0
+            Opaque = False
           end
           object LabelBox79: TLabelBox
             Left = 534
@@ -8221,6 +8298,7 @@ object FormMain: TFormMain
             Index = 90
             CornerSize = 10
             BorderWidth = 0
+            Opaque = False
           end
           object LabelBox80: TLabelBox
             Left = 714
@@ -8248,6 +8326,7 @@ object FormMain: TFormMain
             Index = 82
             CornerSize = 10
             BorderWidth = 0
+            Opaque = False
           end
           object LabelBox81: TLabelBox
             Left = 580
@@ -8275,6 +8354,7 @@ object FormMain: TFormMain
             Index = 91
             CornerSize = 10
             BorderWidth = 0
+            Opaque = False
           end
           object LabelBox82: TLabelBox
             Left = 644
@@ -8302,6 +8382,7 @@ object FormMain: TFormMain
             Index = 92
             CornerSize = 10
             BorderWidth = 0
+            Opaque = False
           end
           object LabelBox83: TLabelBox
             Left = 679
@@ -8329,6 +8410,7 @@ object FormMain: TFormMain
             Index = 93
             CornerSize = 10
             BorderWidth = 0
+            Opaque = False
           end
           object LabelBox84: TLabelBox
             Left = 714
@@ -8356,6 +8438,7 @@ object FormMain: TFormMain
             Index = 94
             CornerSize = 10
             BorderWidth = 0
+            Opaque = False
           end
           object LabelBox85: TLabelBox
             Left = 21
@@ -8383,6 +8466,7 @@ object FormMain: TFormMain
             Index = 17
             CornerSize = 10
             BorderWidth = 0
+            Opaque = False
           end
           object LabelBox86: TLabelBox
             Left = 57
@@ -8410,6 +8494,7 @@ object FormMain: TFormMain
             Index = 18
             CornerSize = 10
             BorderWidth = 0
+            Opaque = False
           end
           object LabelBox88: TLabelBox
             Left = 714
@@ -8437,6 +8522,7 @@ object FormMain: TFormMain
             Index = 33
             CornerSize = 10
             BorderWidth = 0
+            Opaque = False
           end
           object LabelBox89: TLabelBox
             Left = 101
@@ -8464,6 +8550,7 @@ object FormMain: TFormMain
             Index = 36
             CornerSize = 10
             BorderWidth = 0
+            Opaque = False
           end
           object LabelBox90: TLabelBox
             Left = 101
@@ -8491,6 +8578,7 @@ object FormMain: TFormMain
             Index = 53
             CornerSize = 10
             BorderWidth = 0
+            Opaque = False
           end
           object LabelBox91: TLabelBox
             Left = 101
@@ -8518,6 +8606,7 @@ object FormMain: TFormMain
             Index = 69
             CornerSize = 10
             BorderWidth = 0
+            Opaque = False
           end
           object LabelBox92: TLabelBox
             Left = 154
@@ -8545,6 +8634,7 @@ object FormMain: TFormMain
             Index = 86
             CornerSize = 10
             BorderWidth = 0
+            Opaque = False
           end
           object LabelBox93: TLabelBox
             Left = 192
@@ -8572,6 +8662,7 @@ object FormMain: TFormMain
             Index = 87
             CornerSize = 10
             BorderWidth = 0
+            Opaque = False
           end
           object LabelBox94: TLabelBox
             Left = 237
@@ -8599,6 +8690,7 @@ object FormMain: TFormMain
             Index = 88
             CornerSize = 10
             BorderWidth = 0
+            Opaque = False
           end
           object LabelBox95: TLabelBox
             Left = 659
@@ -8626,6 +8718,7 @@ object FormMain: TFormMain
             Index = 49
             CornerSize = 10
             BorderWidth = 0
+            Opaque = False
           end
           object LabelBox96: TLabelBox
             Left = 714
@@ -8653,6 +8746,7 @@ object FormMain: TFormMain
             Index = 50
             CornerSize = 10
             BorderWidth = 0
+            Opaque = False
           end
           object LabelBox97: TLabelBox
             Left = 714
@@ -8680,6 +8774,7 @@ object FormMain: TFormMain
             Index = 66
             CornerSize = 10
             BorderWidth = 0
+            Opaque = False
           end
         end
         object pnlKeysLeft: TPanel
@@ -9341,12 +9436,12 @@ object FormMain: TFormMain
               WordWrap = True
             end
             object textMacroInput: TStaticText
-              Left = 343
+              Left = 260
               Height = 15
               Top = 72
-              Width = 100
+              Width = 225
               Alignment = taCenter
-              Caption = 'input macro here'
+              Caption = 'Input macro here. 300 character maximum.'
               Color = clMenu
               Font.CharSet = ANSI_CHARSET
               Font.Color = clBtnShadow
@@ -9724,12 +9819,12 @@ object FormMain: TFormMain
             LineStyle = psSolid
             LineWidth = 3
           end
-          object lblCreateMacro: TStaticText
+          object lblMacroInfo: TStaticText
             Left = 14
             Height = 27
             Hint = 'Select a key above and input macro in the box below'
             Top = 24
-            Width = 210
+            Width = 362
             Caption = 'Macro'
             Font.CharSet = ANSI_CHARSET
             Font.Color = clWhite
@@ -9816,6 +9911,14 @@ object FormMain: TFormMain
       end
       object miLongDelayM: TMenuItem
         Caption = 'Long Delay (500 ms)'
+        OnClick = miTokenMacroClick
+      end
+      object miRandomDelaysM: TMenuItem
+        Caption = 'Random Delay (1-150 ms)'
+        OnClick = miTokenMacroClick
+      end
+      object miCustomDelayM: TMenuItem
+        Caption = 'Custom Delay (1-999 ms)'
         OnClick = miTokenMacroClick
       end
     end

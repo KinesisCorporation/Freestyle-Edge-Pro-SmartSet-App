@@ -21,6 +21,9 @@ type
     FStateSettings: TStateSettings;
     FAppSettings: TAppSettings;
     FFirmwareVersion: string;
+    FFirmwareMajor: integer;
+    FFirmwareMinor: integer;
+    FFirmwareRevision: integer;
     FModelName: string;
     FLayoutContent: TStringList;
     function GetCompleteFileName: string;
@@ -51,6 +54,8 @@ type
     procedure SetSpeedMsg(value: boolean);
     procedure SetCopyMacroMsg(value: boolean);
     procedure SetResetKeyMsg(value: boolean);
+    function VersionBiggerEqual(major, minor, revision: integer): boolean;
+    function GetFileNumber(sFile: string): integer;
 
     property FileIsValid: boolean read CheckFileValid;
     //property FileContent: TStringList read FFileContent write FFileContent;
@@ -62,6 +67,9 @@ type
     property AppSettings: TAppSettings read FAppSettings;
     property ModelName: string read FModelName;
     property FirmwareVersion: string read FFirmwareVersion;
+    property FirmwareMajor: integer read FFirmwareMajor;
+    property FirmwareMinor: integer read FFirmwareMinor;
+    property FirmwareRevision: integer read FFirmwareRevision;
     property LayoutContent: TStringList read FLayoutContent;
   end;
 
@@ -269,9 +277,11 @@ function TFileService.LoadVersionInfo: string;
 var
   fileExists: boolean;
   fileContent: TStringList;
-  i: integer;
+  i, j: integer;
   currentLine: string;
   sFilePath: string;
+  sTemp: string;
+  sVersion: string;
 const
   FirmwareText = 'firmware version';
   ModelNameText = 'model name';
@@ -293,7 +303,23 @@ begin
         if (Copy(currentLine, 1, length(ModelNameText)) = ModelNameText) then
           FModelName := Trim(Copy(currentLine, length(ModelNameText) + 2, length(currentLine)))
         else if (Copy(currentLine, 1, length(FirmwareText)) = FirmwareText) then
+        begin
           FFirmwareVersion := Trim(Copy(currentLine, length(FirmwareText) + 2, length(currentLine)));
+
+          //Get Major, Minor and Revision numbers
+          sTemp := FFirmwareVersion;
+          for j := 1 to 3 do
+          begin
+            sVersion := Copy(sTemp, 1, Pos('.', sTemp) - 1);
+            Delete(sTemp, 1, Pos('.', sTemp));
+
+            case j of
+              1: FFirmwareMajor := ConvertToInt(sVersion);
+              2: FFirmwareMinor := ConvertToInt(sVersion);
+              3: FFirmwareRevision := ConvertToInt(sVersion);
+            end;
+          end;
+        end;
       end;
     end;
   end
@@ -468,6 +494,23 @@ end;
 procedure TFileService.SetResetKeyMsg(value: boolean);
 begin
   FAppSettings.ResetKeyMsg := value;
+end;
+
+function TFileService.VersionBiggerEqual(major, minor, revision: integer
+  ): boolean;
+begin
+  result := (FFirmwareMajor >= major) and (FFirmwareMinor >= minor) and (FFirmwareRevision >= revision);
+end;
+
+function TFileService.GetFileNumber(sFile: string): integer;
+var
+  idxNumber: integer;
+begin
+  result := 0;
+  sFile := ExtractFileNameWithoutExt(ExtractFileName(sFile));
+  idxNumber := GetIndexOfNumber(sFile);
+  if (idxNumber >= 1) then
+    result := StrToInt(Copy(sFile, idxNumber, Length(sFile)));
 end;
 
 //Receives complete file name and tries to load file

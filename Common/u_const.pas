@@ -128,7 +128,7 @@ function ConvertToLayout(Key: Word): integer;
 function GetCurrentKeyoardLayout: string;
 function GetConfigKeys: TKeyList;
 function CanUseUnicode: boolean;
-function ConvertToInt(value: string): integer;
+function ConvertToInt(value: string; defaultVal: integer = -1): integer;
 function IsLeftShift(key: word): boolean;
 function IsLeftCtrl(key: word): boolean;
 function IsLeftAlt(key: word): boolean;
@@ -217,6 +217,9 @@ const
   VK_KP_ENTER2 = 10069;
   VK_KP_PERI = 10070;
   //FOR ADVANTAGE 2
+  VK_MIN_DELAY = 10071; //Minimum timing delay (1)
+  VK_MAX_DELAY = 10170; //Maximum timing delay (999)
+  VK_RAND_DELAY = 10171; //Random timing delay
 
   MAPVK_VK_TO_VSC = 0;
   MAPVK_VSC_TO_VK = 1;
@@ -352,7 +355,9 @@ const
   APP_SETTINGS_FILE = 'app_settings.txt';
   VERSION_FILE = 'version.txt';
   MACRO_COUNT_FS = 3;
-  MAX_MACRO_FS = 24;
+  MAX_MACRO_FS_PRIOR_340 = 24;
+  MAX_MACRO_FS_340_PLUS = 100;
+  MAX_KEYSTROKES_FS = 7200;
   DISABLE_NOTIF = 100;
   FS_FILENAME = 'layout';
   PITCH_BLACK = 'P';
@@ -362,9 +367,11 @@ const
   ADV2_TUTORIAL = 'https://www.youtube.com/playlist?list=PLcsFMh_3_h0aNmELoR6kakcNf7AInoEfW';
   MODEL_NAME_FSPRO = 'FS PRO';
   MODEL_NAME_FSEDGE = 'FS EDGE';
-  MAX_KEYSTROKES_FS = 300;
+  MAX_KEYSTROKES_MACRO_FS = 300;
   ADV2_2MB = '2MB';
   ADV2_4MB = '4MB';
+  MIN_TIMING_DELAY = 1;
+  MAX_TIMING_DELAY = 999;
 
 implementation
 
@@ -558,7 +565,7 @@ begin
 end;
 
 //Converts a string to Int, if error returns -1
-function ConvertToInt(value: string): integer;
+function ConvertToInt(value: string; defaultVal: integer = -1): integer;
 var
   tempVal, code: integer;
 begin
@@ -566,7 +573,7 @@ begin
   if (code = 0) then
     result := tempVal
   else
-    result := -1;
+    result := defaultVal;
 end;
 
 function IsLeftShift(key: word): boolean;
@@ -996,6 +1003,11 @@ begin
   ConfigKeys.Add(TKey.Create(VK_SPEED5, 'speed5', '', 'speed5', '', '', false, false, '', False));
   ConfigKeys.Add(TKey.Create(VK_125MS, 'd125', '', 'd125', '', '', false, false, '', False));
   ConfigKeys.Add(TKey.Create(VK_500MS, 'd500', '', 'd500', '', '', false, false, '', False));
+  ConfigKeys.Add(TKey.Create(VK_RAND_DELAY, 'dran', '', 'dran', '', '', false, false, '', False));
+
+  //Timing delays 1 to 999
+  for i := MIN_TIMING_DELAY to MAX_TIMING_DELAY do
+    ConfigKeys.Add(TKey.Create(VK_MIN_DELAY + (i - 1), 'd' + Format('%.3d', [i]), '', 'd' + Format('%.3d', [i]), '', '', false, false, '', False));
 
   //Media keys
   mediaFontSize := 4;

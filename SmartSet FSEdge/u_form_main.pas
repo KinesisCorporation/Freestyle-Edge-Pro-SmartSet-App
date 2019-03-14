@@ -9,7 +9,7 @@ uses
   lcltype, Menus, ExtCtrls, Buttons, lclintf, ComCtrls, u_const, u_key_service,
   u_key_layer, u_file_service, LabelBox, LineObj, uEKnob, ueled, ECSwitch,
   ECSlider, HSSpeedButton, RichMemo, u_keys, userdialog, contnrs, u_form_about,
-  LazUTF8, u_form_saveas, u_form_load
+  LazUTF8, u_form_saveas, u_form_load, u_form_timingdelays
   {$ifdef Win32},Windows{$endif}
   {$ifdef Darwin}, MacOSAll, CarbonDef, CarbonProc{$endif};
 
@@ -43,6 +43,8 @@ type
     btnSave: THSSpeedButton;
     btnSaveAs: THSSpeedButton;
     btnNew: THSSpeedButton;
+    miCustomDelayM: TMenuItem;
+    miRandomDelaysM: TMenuItem;
     slMacroSpeed: TECSlider;
     imageKnob: TImage;
     imageList: TImageList;
@@ -149,7 +151,7 @@ type
     LabelBox95: TLabelBox;
     LabelBox96: TLabelBox;
     LabelBox97: TLabelBox;
-    lblCreateMacro: TStaticText;
+    lblMacroInfo: TStaticText;
     lblGlobal0: TStaticText;
     lblPSGlobal: TStaticText;
     lblGlobal17: TStaticText;
@@ -416,6 +418,7 @@ type
     procedure watchTutorialClick(Sender: TObject);
     procedure readManualClick(Sender: TObject);
     procedure openTroubleshootingTipsClick(Sender: TObject);
+    procedure openFirwareWebsite(Sender: TObject);
     procedure createCustomButton(var customBtns: TCustomButtons; btnCaption: string; btnWidth: integer; btnOnClick: TNotifyEvent; btnKind: TBitBtnKind = bkCustom);
     procedure setDvorakBothLayers(Sender: TObject);
     procedure setDvorakTopLayer(Sender: TObject);
@@ -450,7 +453,12 @@ type
     settingLedMode: boolean;
     remapCount: integer;
     macroCount: integer;
+    maxMacros : integer;
+    maxKeystrokes : integer;
+    totalKeystrokes: integer;
 
+    function DoneKey: boolean;
+    function DoneMacro: boolean;
     procedure SetConfigOS;
     procedure SetKeyboardHook;
     procedure RemoveKeyboardHook;
@@ -464,7 +472,7 @@ type
     function LoadVersionInfo: boolean;
     function LoadKeyboardLayout(layoutFile: string): boolean;
     function CheckToSave: boolean;
-    function Save(isNew: boolean = false; showSaveDialog: boolean = true): boolean;
+    function Save(layoutFile: string; isNew: boolean = false; showSaveDialog: boolean = true): boolean;
     procedure SaveAs(isNew: boolean = false);
     procedure LoadLayer(layer: TKBLayer);
     procedure UpdateKeyButtonKey(kbKey: TKBKey; keyButton: TLabelBox; unselectKey: boolean = false);
@@ -500,6 +508,7 @@ type
     function ValidateBeforeDone: boolean;
     procedure AppDeactivate(Sender: TObject);
     procedure EnableMacroBox(value: boolean);
+    function ValidateBeforeSave: boolean;
   public
     { public declarations }
   end;
@@ -758,6 +767,21 @@ begin
   canShowApp := LoadVersionInfo;
   if (canShowApp) then
   begin
+    //Firmware version 1.0.340 or more
+    if (fileService.VersionBiggerEqual(1, 0, 340)) then
+    begin
+      maxMacros := MAX_MACRO_FS_340_PLUS;
+      maxKeystrokes := MAX_KEYSTROKES_FS;
+    end
+    //Firwmware version prior to 1.0.340
+    else
+    begin
+      maxMacros := MAX_MACRO_FS_PRIOR_340;
+      maxKeystrokes := MAX_KEYSTROKES_FS;
+    end;
+    lblMacroInfo.Hint := lblMacroInfo.Hint + #10 + 'Each layout can store ' + IntToStr(maxKeystrokes) +
+      ' total macro characters and up to ' + IntToStr(maxMacros) + ' macros';
+
     //Load config keys depending on app version
     keyService.LoadConfigKeys;
 
@@ -1334,12 +1358,14 @@ begin
   end;
 end;
 
-procedure TFormMain.btnDoneKeyClick(Sender: TObject);
+function TFormMain.DoneKey: boolean;
 begin
+  result := false;
   if IsKeyLoaded then
   begin
     if ValidateBeforeDone then
     begin
+      result := true;
       KeyModified := false;
       MacroModified := false;
       SetSaveState(ssModifed);
@@ -1351,13 +1377,20 @@ begin
   end;
 end;
 
-procedure TFormMain.btnDoneMacroClick(Sender: TObject);
+procedure TFormMain.btnDoneKeyClick(Sender: TObject);
+begin
+  DoneKey;
+end;
+
+function TFormMain.DoneMacro: boolean;
 var
   keyAssigned: string;
   extraInfo: string;
 begin
+  result := false;
   if ValidateBeforeDone then
   begin
+    result := true;
     KeyModified := false;
     MacroModified := false;
     SetSaveState(ssModifed);
@@ -1384,6 +1417,11 @@ begin
           backColor, fontColor);
     end;
   end;
+end;
+
+procedure TFormMain.btnDoneMacroClick(Sender: TObject);
+begin
+  DoneMacro;
 end;
 
 procedure TFormMain.btnLoadClick(Sender: TObject);
@@ -1433,7 +1471,7 @@ begin
   if fileService.NewFile then
     SaveAs
   else
-    Save;
+    Save(currentLayoutFile);
 end;
 
 procedure TFormMain.eMacroFreqChange(Sender: TObject);
@@ -1614,6 +1652,7 @@ var
 begin
   remapCount := 0;
   macroCount := 0;
+  totalKeystrokes := 0;
   for i := 0 to keyService.KBLayers.Count - 1 do
   begin
     aLayer := keyService.KBLayers[i];
@@ -1635,15 +1674,17 @@ begin
     end;
   end;
 
+  totalKeystrokes := keyService.CountAllKeystrokes;
+
   if (remapCount > 0) then
     lblRemapKey.Caption := 'Remap (' + IntToStr(remapCount) + ')'
   else
     lblRemapKey.Caption := 'Remap';
 
   if (macroCount > 0) then
-    lblCreateMacro.Caption := 'Macro (' + IntToStr(macroCount) + ')'
+    lblMacroInfo.Caption := 'Macro (' + IntToStr(macroCount) + '/' + IntToStr(maxMacros) + ')' + '  ' + IntToStr(trunc((totalKeystrokes / maxKeystrokes) * 100)) + '% Full'
   else
-    lblCreateMacro.Caption := 'Macro';
+    lblMacroInfo.Caption := 'Macro';
 
   btnResetLayer.Enabled := (remapCount > 0) or (macroCount > 0);
   btnResetLayout.Enabled := (remapCount > 0) or (macroCount > 0);
@@ -1793,6 +1834,8 @@ end;
 procedure TFormMain.miTokenMacroClick(Sender: TObject);
 var
   menuItem: TMenuItem;
+  timingDelay: integer;
+  customBtns: TCustomButtons;
 begin
   menuItem := sender as TMenuItem;
 
@@ -1896,6 +1939,36 @@ begin
     SetModifiedKey(VK_125MS, '', true)
   else if menuItem = miLongDelayM then
     SetModifiedKey(VK_500MS, '', true)
+  else if menuItem = miRandomDelaysM then
+  begin
+    if (fileService.VersionBiggerEqual(1, 0, 340)) then
+      SetModifiedKey(VK_RAND_DELAY, '', true)
+    else
+    begin
+      createCustomButton(customBtns, 'OK', 150, nil, bkOK);
+      createCustomButton(customBtns, 'Upgrade Firmware', 150, @openFirwareWebsite);
+      ShowDialog('Macro Delays', 'To utilize custom or random delays, please download and install the latest firmware.',
+        mtWarning, [], DEFAULT_DIAG_HEIGHT, backColor, fontColor, customBtns);
+    end;
+  end
+  else if menuItem = miCustomDelayM then
+  begin
+    if (fileService.VersionBiggerEqual(1, 0, 340)) then
+    begin
+      NeedInput := True;
+      timingDelay := ShowTimingDelays(backColor, fontColor);
+      if (timingDelay >= MIN_TIMING_DELAY) and (timingDelay <= MAX_TIMING_DELAY) then
+        SetModifiedKey(VK_MIN_DELAY + (timingDelay - 1), '', true);
+      NeedInput := False;
+    end
+    else
+    begin
+      createCustomButton(customBtns, 'OK', 150, nil, bkOK);
+      createCustomButton(customBtns, 'Upgrade Firmware', 150, @openFirwareWebsite);
+      ShowDialog('Macro Delays', 'To utilize custom or random delays, please download and install the latest firmware.',
+        mtWarning, [], DEFAULT_DIAG_HEIGHT, backColor, fontColor, customBtns);
+    end;
+  end
   else if menuItem = miF13M then
     SetModifiedKey(VK_F13, '', true)
   else if menuItem = miF14M then
@@ -2427,6 +2500,14 @@ begin
   OpenUrl('https://gaming.kinesis-ergo.com/support/fs-edge-support/');
 end;
 
+procedure TFormMain.openFirwareWebsite(Sender: TObject);
+begin
+  if (GApplication = APPL_FSPRO) then
+    OpenUrl('https://kinesis-ergo.com/support/freestyle-pro/')
+  else
+    OpenUrl('https://gaming.kinesis-ergo.com/fs-edge-support');
+end;
+
 procedure TFormMain.createCustomButton(var customBtns: TCustomButtons;
   btnCaption: string; btnWidth: integer; btnOnClick: TNotifyEvent;
   btnKind: TBitBtnKind = bkCustom);
@@ -2656,23 +2737,50 @@ var
   errorMsg: string;
   errorTitle: string;
   isValid: boolean;
+  customBtns: TCustomButtons;
+  keystrokes: integer;
+  fileName: string;
+  idxNumber: integer;
+  isCustomLayout: boolean;
 begin
   isValid := keyService.ValidateMacros(activeKbKey, errorMsg, errorTitle);
 
   if isValid then
   begin
     RefreshRemapInfo;
-    if macroCount > MAX_MACRO_FS then
-    begin
-      isValid := false;
-      errorMsg := 'Only ' + IntToStr(MAX_MACRO_FS) + ' macros can be saved to a layout. To proceed, erase a macro or create a new layout.';
-      errorTitle := 'Macro Capacity Reached';
-    end;
-  end;
 
-  if not isValid then
-    ShowDialog(errorTitle, errorMsg, mtError, [mbOK], DEFAULT_DIAG_HEIGHT,
-          backColor, fontColor);
+    if (MacroModified) then
+    begin
+      if (macroCount > maxMacros) then
+      begin
+        //Allow clicking done but not saving
+        //isValid := false;
+        createCustomButton(customBtns, 'OK', 150, nil, bkOK);
+        createCustomButton(customBtns, 'Upgrade Firmware', 150, @openFirwareWebsite);
+        ShowDialog('Macro Capacity Reached', 'Only ' + IntToStr(maxMacros) + ' macros can be saved to a layout. If you need additional macros, please download and install the latest firmware.',
+          mtWarning, [], DEFAULT_DIAG_HEIGHT, backColor, fontColor, customBtns);
+      end
+      else
+      begin
+        if (totalKeystrokes > maxKeystrokes) then
+        begin
+          isValid := false;
+          fileName := ExtractFileNameWithoutExt(ExtractFileName(currentLayoutFile));
+          idxNumber := fileService.GetFileNumber(fileName);
+          isCustomLayout := LowerCase(Copy(fileName, 1, Length(FS_FILENAME))) <> FS_FILENAME;
+          if (not isCustomLayout) then
+            fileName := 'Layout ' + IntToStr(idxNumber);
+          ShowDialog('Macro Limit Reached', 'You have reached the macro limit for ' + fileName + '. To proceed, please delete an unused macro from this layout or create a new layout.',
+            mtError, [mbOk], DEFAULT_DIAG_HEIGHT, backColor, fontColor, customBtns);
+        end;
+      end;
+    end;
+  end
+  else
+  begin
+    ShowDialog(errorTitle, errorMsg, mtError, [mbOk], DEFAULT_DIAG_HEIGHT,
+          backColor, fontColor, customBtns);
+  end;
 
   result := isValid;
 end;
@@ -2805,8 +2913,8 @@ begin
         'This macro has been modified, do you want to apply these changes?', mtConfirmation,
         [mbYes, mbNo, mbCancel], DEFAULT_DIAG_HEIGHT, backColor, fontColor);
     if msgResult = mrYes then
-      btnDoneMacro.Click
-     else if msgResult = mrNo then
+      result := DoneMacro
+    else if msgResult = mrNo then
       btnCancelMacro.Click
     else
       result := false;
@@ -2817,8 +2925,8 @@ begin
       result := false;
     end;
   end
-  else if (KeyModified) then
-    btnDoneKey.Click;
+  else if IsKeyLoaded and KeyModified then
+    result := DoneKey;
 
   //if IsKeyLoaded and MacroMode and MacroModified then
   //begin
@@ -3021,7 +3129,7 @@ begin
       mtConfirmation, [mbYes, mbNo], DEFAULT_DIAG_HEIGHT, backColor, fontColor);
 
     if dialogResult = mrYes then
-      btnSave.Click
+      result := Save(currentLayoutFile)
     else if dialogResult = mrNo then
       SetSaveState(ssNone)
     else
@@ -3029,7 +3137,53 @@ begin
   end;
 end;
 
-function TFormMain.Save(isNew: boolean = false; showSaveDialog: boolean = true): boolean;
+function TFormMain.ValidateBeforeSave: boolean;
+var
+  errorMsg: string;
+  errorTitle: string;
+  isValid: boolean;
+  keystrokes: integer;
+  fileName: string;
+  idxNumber: integer;
+  isCustomLayout: boolean;
+  macrosToRemove: integer;
+begin
+  isValid := true;
+
+  RefreshRemapInfo;
+
+  if (macroCount > maxMacros) then
+  begin
+    isValid := false;
+    macrosToRemove := macroCount - maxMacros;
+    errorTitle := 'Macro Capacity Reached';
+    errorMsg := 'Please delete ' + IntToStr(macrosToRemove) + ' macros before proceeding. Each layout can accommodate a maximum of ' + IntToStr(maxMacros) + ' macros.';
+  end
+  else
+  begin
+    if (totalKeystrokes > maxKeystrokes) then
+    begin
+      isValid := false;
+      fileName := ExtractFileNameWithoutExt(ExtractFileName(currentLayoutFile));
+      idxNumber := fileService.GetFileNumber(fileName);
+      isCustomLayout := LowerCase(Copy(fileName, 1, Length(FS_FILENAME))) <> FS_FILENAME;
+      if (not isCustomLayout) then
+        fileName := 'Layout ' + IntToStr(idxNumber);
+      errorTitle := 'Macro Limit Reached';
+      errorMsg := 'You have reached the macro limit for ' + fileName + '. To proceed, please delete an unused macro from this layout or create a new layout.';
+    end;
+  end;
+
+  if (not isValid) then
+  begin
+    ShowDialog(errorTitle, errorMsg, mtError, [mbOk], DEFAULT_DIAG_HEIGHT,
+          backColor, fontColor);
+  end;
+
+  result := isValid;
+end;
+
+function TFormMain.Save(layoutFile: string; isNew: boolean = false; showSaveDialog: boolean = true): boolean;
 var
   errorMsg: string;
   layoutContent: TStringList;
@@ -3046,42 +3200,43 @@ begin
 
   if (CheckSaveKey(true)) then
   begin
-    layoutContent := keyService.ConvertToTextFileFmtFS;
-    if fileService.SaveFile(currentLayoutFile, layoutContent, isNew, errorMsg) then
+    if (ValidateBeforeSave) then
     begin
-      if (not fileService.AppSettings.SaveMsg) and (showSaveDialog) then
+      layoutContent := keyService.ConvertToTextFileFmtFS;
+      if fileService.SaveFile(layoutFile, layoutContent, isNew, errorMsg) then
       begin
-        fileName := ExtractFileNameWithoutExt(ExtractFileName(currentLayoutFile));
-        idxNumber := GetIndexOfNumber(fileName);
-        if (idxNumber >= 1) then
-          layoutNumber := Copy(fileName, idxNumber, Length(fileName));
-        isCustomLayout := LowerCase(Copy(fileName, 1, Length(FS_FILENAME))) <> FS_FILENAME;
-        if (isCustomLayout) then
+        if (not fileService.AppSettings.SaveMsg) and (showSaveDialog) then
         begin
-          diagMessage := 'This custom layout has been saved as ' + filename + '. To load this layout to the keyboard it must first be assigned to position 1-9 using the Save As button.';
-          diagTitle := 'Backup Layout & Settings Saved';
-        end
-        else
-        begin
-          diagMessage := 'Your changes have been saved to Layout ' + layoutNumber + '. To implement your changes use the Refresh Shortcut (SmartSet + Layout) or simply close the v-Drive (SmartSet + F8).';
-          diagTitle := 'Layout & Settings Saved';
+          fileName := ExtractFileNameWithoutExt(ExtractFileName(layoutFile));
+          idxNumber := fileService.GetFileNumber(fileName);
+          isCustomLayout := LowerCase(Copy(fileName, 1, Length(FS_FILENAME))) <> FS_FILENAME;
+          if (isCustomLayout) then
+          begin
+            diagMessage := 'This custom layout has been saved as ' + filename + '. To load this layout to the keyboard it must first be assigned to position 1-9 using the Save As button.';
+            diagTitle := 'Backup Layout & Settings Saved';
+          end
+          else
+          begin
+            diagMessage := 'Your changes have been saved to Layout ' + layoutNumber + '. To implement your changes use the Refresh Shortcut (SmartSet + Layout) or simply close the v-Drive (SmartSet + F8).';
+            diagTitle := 'Layout & Settings Saved';
+          end;
+          hideNotif := ShowDialog(diagTitle, diagMessage,
+            mtInformation, [mbOK], DEFAULT_DIAG_HEIGHT, backColor, fontColor, nil, 'Hide this notification?');
+          if (hideNotif >= DISABLE_NOTIF) then
+          begin
+            fileService.SetSaveMsg(true);
+            fileService.SaveAppSettings;
+          end;
         end;
-        hideNotif := ShowDialog(diagTitle, diagMessage,
-          mtInformation, [mbOK], DEFAULT_DIAG_HEIGHT, backColor, fontColor, nil, 'Hide this notification?');
-        if (hideNotif >= DISABLE_NOTIF) then
-        begin
-          fileService.SetSaveMsg(true);
-          fileService.SaveAppSettings;
-        end;
-      end;
-      SetSaveState(ssNone);
-      result := true;
-    end
-    else
-      ShowDialog('Save', 'Error saving file: ' + errorMsg + #10 + 'Confirm that the v-drive is still open.',
-        mtError, [mbOK], DEFAULT_DIAG_HEIGHT, backColor, fontColor);
+        SetSaveState(ssNone);
+        result := true;
+      end
+      else
+        ShowDialog('Save', 'Error saving file: ' + errorMsg + #10 + 'Confirm that the v-drive is still open.',
+          mtError, [mbOK], DEFAULT_DIAG_HEIGHT, backColor, fontColor);
 
-    SaveStateSettings;
+      SaveStateSettings;
+    end;
   end;
 end;
 
@@ -3090,6 +3245,7 @@ var
   fileName: string;
   isBackupFile: boolean;
   layoutPosition: string;
+  layoutFile: string;
 begin
   NeedInput := True;
   fileName := ShowSaveAs(backColor, fontColor, isBackupFile, layoutPosition);
@@ -3103,17 +3259,20 @@ begin
     //begin
       if (isNew) then
         keyService.ResetLayout;
-      currentLayoutFile := GLayoutFilePath + fileName; //SaveDialog.FileName;
-      Save(true, false);
-      LoadKeyboardLayout(currentLayoutFile);
+      layoutFile := GLayoutFilePath + fileName; //SaveDialog.FileName;
+      if (Save(layoutFile, true, false)) then
+      begin
+        currentLayoutFile := layoutFile;
+        LoadKeyboardLayout(currentLayoutFile);
 
-      filename := ExtractFileNameWithoutExt(ExtractFileName(fileName));
-      if (isBackupFile) then
-        ShowDialog('Backup Layout & Settings Saved', 'This custom layout has been saved as ' + filename + '. To load this layout to the keyboard it must first be assigned to position 1-9 using the Save As button.',
-          mtInformation, [mbOK], DEFAULT_DIAG_HEIGHT, backColor, fontColor)
-      else
-        ShowDialog('Layout & Settings Saved', 'This custom layout has been saved to Layout ' + layoutPosition + '. To implement your changes use the Refresh Shortcut (SmartSet + Layout) or simply close the v-Drive (SmartSet + F8). To load this layout to the keyboard press SmartSet + ' + layoutPosition + '.',
-          mtInformation, [mbOK], DEFAULT_DIAG_HEIGHT, backColor, fontColor);
+        filename := ExtractFileNameWithoutExt(ExtractFileName(fileName));
+        if (isBackupFile) then
+          ShowDialog('Backup Layout & Settings Saved', 'This custom layout has been saved as ' + filename + '. To load this layout to the keyboard it must first be assigned to position 1-9 using the Save As button.',
+            mtInformation, [mbOK], DEFAULT_DIAG_HEIGHT, backColor, fontColor)
+        else
+          ShowDialog('Layout & Settings Saved', 'This custom layout has been saved to Layout ' + layoutPosition + '. To implement your changes use the Refresh Shortcut (SmartSet + Layout) or simply close the v-Drive (SmartSet + F8). To load this layout to the keyboard press SmartSet + ' + layoutPosition + '.',
+            mtInformation, [mbOK], DEFAULT_DIAG_HEIGHT, backColor, fontColor);
+      end;
     //end;
   end;
   NeedInput := False;
@@ -3227,7 +3386,7 @@ begin
       nbKeystrokes := keyService.CountKeystrokes(activeKbKey.ActiveMacro);
       inc(nbKeystrokes);
       nbKeystrokes := nbKeystrokes + (keyService.CountModifiers(Modifiers) * 2);
-      if (nbKeystrokes > MAX_KEYSTROKES_FS) then
+      if (nbKeystrokes > MAX_KEYSTROKES_MACRO_FS) then
         ShowDialog('Maximum Length Reached', 'Macros are limited to approximately 300 characters.',
           mtError, [mbOK], DEFAULT_DIAG_HEIGHT, backColor, fontColor)
       else

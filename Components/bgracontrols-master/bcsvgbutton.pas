@@ -37,14 +37,22 @@
   Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 }
 
+{******************************* CONTRIBUTOR(S) ******************************
+- Edivando S. Santos Brasil | mailedivando@gmail.com
+  (Compatibility with delphi VCL 11/2018)
+
+***************************** END CONTRIBUTOR(S) *****************************}
 unit BCSVGButton;
 
-{$mode objfpc}{$H+}
+{$I bgracontrols.inc}
 
 interface
 
 uses
-  Classes, SysUtils, Forms, Controls, Graphics, Dialogs, BCSVGViewer,LResources,lazutils;
+  Classes, SysUtils, Forms, Controls, Graphics, Dialogs,
+  {$IFDEF FPC}LResources, lazutils,{$ENDIF}
+  {$IFNDEF FPC}Windows, Messages, BGRAGraphics, GraphType, FPImage, {$ENDIF}
+  BCSVGViewer;
 
 type
 
@@ -92,6 +100,8 @@ type
     destructor Destroy; override;
     procedure paint; override;
   published
+    property BorderSpacing;
+    property Constraints;
     Property FileNameDown : String Read FFileNameDown Write setFFileNameDown;
     Property FileNameHover : String Read FFileNameHover Write setFFileNameHover;
     Property FileNameNormal : String Read FFileNameNormal Write setFFileNameNormal;
@@ -104,10 +114,9 @@ type
     property Position:integer read fposition write SetPosition;
     property Maximum:integer read fmax write SetMax;
     property OnPositionChange: TNotifyEvent read FOnPositionChange write FOnPositionChange;
-
   end;
 
-procedure Register;
+{$IFDEF FPC}procedure Register;{$ENDIF}
 
 implementation
 
@@ -144,8 +153,8 @@ begin
 end;
 
 procedure TBCSVGButton.ReadSVGFileAndSetString(fn:String;itm:Integer);
-var li,st:ansistring;
-    F:Text;
+var li,st: {$IFDEF FPC}ansistring{$ELSE}string{$ENDIF};
+    F: {$IFDEF FPC}Text{$ELSE}TextFile{$ENDIF};
 
 begin
   li:='';
@@ -219,8 +228,6 @@ begin
 end;
 
 procedure TBCSVGButton.setFFileNameDown(const AValue: string);
-var li,st:ansistring;
-    F:Text;
 begin
   If AValue<>'' then ReadSVGFileAndSetString(Avalue,2);
 End;
@@ -362,11 +369,13 @@ begin
   inherited RedrawBitmapContent;
 end;
 
+{$IFDEF FPC}
 procedure Register;
 begin
   {$I icons\bcsvgbutton.lrs}
-  RegisterComponents('BGRA Controls',[TBCSVGButton]);
+  RegisterComponents('BGRA Button Controls',[TBCSVGButton]);
 end;
+{$ENDIF}
 
 
 

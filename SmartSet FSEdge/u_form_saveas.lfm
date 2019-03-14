@@ -11,10 +11,10 @@ object FormSaveAs: TFormSaveAs
   Font.Name = 'Tahoma'
   OnCreate = FormCreate
   Position = poMainFormCenter
-  LCLVersion = '1.6.4.0'
+  LCLVersion = '1.8.4.0'
   object rgLayout: TRadioButton
     Left = 31
-    Height = 18
+    Height = 19
     Top = 36
     Width = 20
     OnChange = rgLayoutChange
@@ -24,7 +24,7 @@ object FormSaveAs: TFormSaveAs
   end
   object rgCustom: TRadioButton
     Left = 31
-    Height = 18
+    Height = 19
     Top = 68
     Width = 20
     OnChange = rgCustomChange
@@ -37,7 +37,7 @@ object FormSaveAs: TFormSaveAs
     Height = 19
     Hint = 'Assign to position 1-9 for easy access'
     Top = 36
-    Width = 176
+    Width = 179
     Caption = 'Assign to Layout Position'
     Color = 2500134
     Font.Color = clWhite
@@ -55,7 +55,7 @@ object FormSaveAs: TFormSaveAs
     Height = 19
     Hint = 'Saved to the keyboard but not directly accessible'
     Top = 68
-    Width = 110
+    Width = 108
     Caption = 'Save as Backup'
     Color = 2500134
     Font.Color = clWhite
@@ -70,13 +70,13 @@ object FormSaveAs: TFormSaveAs
   end
   object cboLayout: TComboBox
     Left = 280
-    Height = 21
+    Height = 27
     Hint = 'Assign to position 1-9 for easy access'
     Top = 32
     Width = 56
     Font.Height = -16
     Font.Name = 'Tahoma'
-    ItemHeight = 0
+    ItemHeight = 19
     Items.Strings = (
       '1'
       '2'
@@ -92,11 +92,12 @@ object FormSaveAs: TFormSaveAs
     ParentFont = False
     ParentShowHint = False
     ShowHint = True
+    Style = csDropDownList
     TabOrder = 2
   end
   object eCustLayout: TEdit
     Left = 280
-    Height = 22
+    Height = 27
     Hint = 'Saved to the keyboard but not directly accessible'
     Top = 64
     Width = 101
@@ -138,6 +139,7 @@ object FormSaveAs: TFormSaveAs
     Smooth = 8
     Style = bsModern
     Index = -1
+    TransparentColor = clBlack
     OnClick = btnSaveClick
   end
   object btnCancel: THSSpeedButton
@@ -171,6 +173,7 @@ object FormSaveAs: TFormSaveAs
     Smooth = 8
     Style = bsModern
     Index = -1
+    TransparentColor = clBlack
     OnClick = btnCancelClick
   end
 end

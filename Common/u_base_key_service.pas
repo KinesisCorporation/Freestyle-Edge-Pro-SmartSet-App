@@ -83,6 +83,7 @@ type
     function ValidateMacros(aKey: TKbKey; var errorMsg: string; var errorMsgTitle: string): boolean;
     function CountModifiers(modifiers: string): integer;
     function CountKeystrokes(aKeyList: TKeyList): integer;
+    function CountAllKeystrokes: integer;
     procedure LoadConfigKeys;
     function GetModifierValues(aKey: TKey): string;
 
@@ -2649,6 +2650,29 @@ begin
       end;
     end;
   end;
+end;
+
+function TBaseKeyService.CountAllKeystrokes: integer;
+var
+  layerIdx, keyIdx:integer;
+  keystrokes: integer;
+  aKbKey: TKBKey;
+begin
+  keystrokes := 0;
+  for layerIdx := 0 to FKBLayers.Count - 1 do
+  begin
+    for keyIdx := 0 to FKBLayers[layerIdx].KBKeyList.Count - 1 do
+    begin
+      aKbKey := FKBLayers[layerIdx].KBKeyList[keyIdx];
+      if (aKbKey.IsMacro) then
+      begin
+        keystrokes += CountKeystrokes(aKbKey.Macro1);
+        keystrokes += CountKeystrokes(aKbKey.Macro2);
+        keystrokes += CountKeystrokes(aKbKey.Macro3);
+      end;
+    end;
+  end;
+  result := keystrokes;
 end;
 
 procedure TBaseKeyService.LoadConfigKeys;

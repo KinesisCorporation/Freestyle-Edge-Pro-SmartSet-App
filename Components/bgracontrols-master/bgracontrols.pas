@@ -9,14 +9,14 @@ interface
 
 uses
   BCButton, BCButtonFocus, BCEffect, bcfilters, BCGameGrid, BCImageButton, 
-  BCLabel, BCListBox, BCMaterialDesignButton, BCPanel, BCRadialProgressBar, 
-  BCRTTI, BCSamples, BCStylesForm, BCSVGButton, BCSVGViewer, BCToolBar, 
-  BCTrackbarUpdown, BGRACustomDrawn, BGRAFlashProgressBar, BGRAGraphicControl, 
-  BGRAImageList, BGRAImageManipulation, BGRAKnob, BGRAResizeSpeedButton, 
-  BGRAShape, BGRASpeedButton, BGRASpriteAnimation, BGRAVirtualScreen, 
-  ColorSpeedButton, DTAnalogClock, DTAnalogGauge, dtthemedclock, 
-  dtthemedgauge, MaterialColors, bcmdbutton, bcmdbuttonfocus, 
-  LazarusPackageIntf;
+  BCLabel, BCListBox, BCMaterialDesignButton, BCMDButton, BCMDButtonFocus, 
+  BCPanel, BCRadialProgressBar, BCRTTI, BCSamples, BCStylesForm, BCSVGButton, 
+  BCSVGViewer, BCToolBar, BCTrackbarUpdown, BGRACustomDrawn, 
+  BGRAFlashProgressBar, BGRAGraphicControl, BGRAImageList, 
+  BGRAImageManipulation, BGRAKnob, BGRAResizeSpeedButton, BGRAShape, 
+  BGRASpeedButton, BGRASpriteAnimation, BGRAVirtualScreen, ColorSpeedButton, 
+  DTAnalogClock, DTAnalogCommon, DTAnalogGauge, dtthemedclock, dtthemedgauge, 
+  MaterialColors, LazarusPackageIntf;
 
 implementation
 
@@ -29,6 +29,8 @@ begin
   RegisterUnit('BCLabel', @BCLabel.Register);
   RegisterUnit('BCListBox', @BCListBox.Register);
   RegisterUnit('BCMaterialDesignButton', @BCMaterialDesignButton.Register);
+  RegisterUnit('BCMDButton', @BCMDButton.Register);
+  RegisterUnit('BCMDButtonFocus', @BCMDButtonFocus.Register);
   RegisterUnit('BCPanel', @BCPanel.Register);
   RegisterUnit('BCRadialProgressBar', @BCRadialProgressBar.Register);
   RegisterUnit('BCSVGButton', @BCSVGButton.Register);
@@ -50,8 +52,6 @@ begin
   RegisterUnit('DTAnalogGauge', @DTAnalogGauge.Register);
   RegisterUnit('dtthemedclock', @dtthemedclock.Register);
   RegisterUnit('dtthemedgauge', @dtthemedgauge.Register);
-  RegisterUnit('bcmdbutton', @bcmdbutton.Register);
-  RegisterUnit('bcmdbuttonfocus', @bcmdbuttonfocus.Register);
 end;
 
 initialization

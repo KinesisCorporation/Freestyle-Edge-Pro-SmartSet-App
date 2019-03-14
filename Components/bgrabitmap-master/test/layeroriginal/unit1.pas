@@ -15,6 +15,7 @@ type
 
   TForm1 = class(TForm)
     BCFlipX: TBCButton;
+    BCSave: TBCButton;
     BCFlipY: TBCButton;
     BCRotCW: TBCButton;
     BCRotCCW: TBCButton;
@@ -25,6 +26,8 @@ type
     cbInterp: TComboBox;
     cbRepeat: TComboBox;
     cbGradientType: TComboBox;
+    SaveDialog1: TSaveDialog;
+    procedure BCSaveClick(Sender: TObject);
     procedure BCFlipXClick(Sender: TObject);
     procedure BCFlipYClick(Sender: TObject);
     procedure BCRotCWClick(Sender: TObject);
@@ -45,6 +48,7 @@ type
     procedure FormDestroy(Sender: TObject);
   private
     procedure OriginalChange(Sender: TObject; {%H-}AOriginal: TBGRALayerCustomOriginal);
+    procedure SetVSCursor(ACursor: TOriginalEditorCursor);
   public
     FLayers: TBGRALayeredBitmap;
   end;
@@ -54,7 +58,7 @@ var
 
 implementation
 
-uses BGRATransform, BGRASVGOriginal, BGRAGradientOriginal;
+uses BGRATransform, BGRASVGOriginal, BGRAGradientOriginal, BGRALazPaint;
 
 {$R *.lfm}
 
@@ -63,21 +67,39 @@ uses BGRATransform, BGRASVGOriginal, BGRAGradientOriginal;
 procedure TForm1.BCFlipXClick(Sender: TObject);
 begin
   FLayers.HorizontalFlip;
+  BGRAVirtualScreen1.DiscardBitmap;
+end;
+
+procedure TForm1.BCSaveClick(Sender: TObject);
+begin
+  if SaveDialog1.Execute then
+  begin
+    RegisterLazPaintFormat;
+    try
+      FLayers.SaveToFile(SaveDialog1.FileName);
+    except
+      on ex:exception do
+        ShowMessage(ex.Message);
+    end;
+  end;
 end;
 
 procedure TForm1.BCFlipYClick(Sender: TObject);
 begin
   FLayers.VerticalFlip;
+  BGRAVirtualScreen1.DiscardBitmap;
 end;
 
 procedure TForm1.BCRotCWClick(Sender: TObject);
 begin
   FLayers.RotateCW;
+  BGRAVirtualScreen1.DiscardBitmap;
 end;
 
 procedure TForm1.BCRotCCWClick(Sender: TObject);
 begin
   FLayers.RotateCCW;
+  BGRAVirtualScreen1.DiscardBitmap;
 end;
 
 procedure TForm1.BCColor1Click(Sender: TObject);
@@ -104,10 +126,7 @@ var
   newCursor: TOriginalEditorCursor;
 begin
   FLayers.MouseDown(Button=mbRight,Shift,X,Y,newCursor);
-  case newCursor of
-  oecDefault: BGRAVirtualScreen1.Cursor := crDefault;
-  oecMove: BGRAVirtualScreen1.Cursor := crSize;
-  end;
+  SetVSCursor(newCursor);
 end;
 
 procedure TForm1.BGRAVirtualScreen1MouseMove(Sender: TObject;
@@ -116,10 +135,7 @@ var
   newCursor: TOriginalEditorCursor;
 begin
   FLayers.MouseMove(Shift,X,Y,newCursor);
-  case newCursor of
-  oecDefault: BGRAVirtualScreen1.Cursor := crDefault;
-  oecMove: BGRAVirtualScreen1.Cursor := crSize;
-  end;
+  SetVSCursor(newCursor);
 end;
 
 procedure TForm1.BGRAVirtualScreen1MouseUp(Sender: TObject;
@@ -128,10 +144,7 @@ var
   newCursor: TOriginalEditorCursor;
 begin
   FLayers.MouseUp(Button=mbRight,Shift,X,Y,newCursor);
-  case newCursor of
-  oecDefault: BGRAVirtualScreen1.Cursor := crDefault;
-  oecMove: BGRAVirtualScreen1.Cursor := crSize;
-  end;
+  SetVSCursor(newCursor);
 end;
 
 procedure TForm1.BGRAVirtualScreen1Redraw(Sender: TObject; Bitmap: TBGRABitmap);
@@ -169,6 +182,7 @@ var
   grad: TBGRALayerGradientOriginal;
   svg: TBGRALayerSVGOriginal;
   img: TBGRALayerImageOriginal;
+  gradStream: TMemoryStream;
   idxBike, idxImg: Integer;
 begin
   FLayers := TBGRALayeredBitmap.Create(640,480);
@@ -178,18 +192,21 @@ begin
   cbInterp.ItemIndex := 0;
   cbRepeat.ItemIndex := 0;
 
+  gradStream := TMemoryStream.Create;
   grad := TBGRALayerGradientOriginal.Create;
   grad.StartColor := CSSSkyBlue;
   grad.EndColor := CSSOrange;
   grad.GradientType:= gtLinear;
   grad.Origin := PointF(FLayers.Width/2,100);
   grad.XAxis := grad.origin+PointF(0,250);
-  grad.SaveToFile(Application.Location + 'grad.data');    //save original definition
+  grad.SaveToStream(gradStream);    //save original definition
   grad.Free;
 
   grad := TBGRALayerGradientOriginal.Create;
-  grad.LoadFromFile(Application.Location + 'grad.data'); // load original definition
+  gradStream.Position:= 0;
+  grad.LoadFromStream(gradStream); // load original definition
   FLayers.AddLayerFromOwnedOriginal(grad);
+  gradStream.free;
 
   svg := TBGRALayerSVGOriginal.Create;
   svg.LoadFromFile(Application.Location + 'bicycling.svg');
@@ -217,6 +234,22 @@ procedure TForm1.OriginalChange(Sender: TObject;
   AOriginal: TBGRALayerCustomOriginal);
 begin
   BGRAVirtualScreen1.DiscardBitmap;
+end;
+
+procedure TForm1.SetVSCursor(ACursor: TOriginalEditorCursor);
+begin
+  case ACursor of
+  oecDefault: BGRAVirtualScreen1.Cursor := crDefault;
+  oecMove: BGRAVirtualScreen1.Cursor := crSize;
+  oecMoveE: BGRAVirtualScreen1.Cursor := crSizeE;
+  oecMoveW: BGRAVirtualScreen1.Cursor := crSizeW;
+  oecMoveN: BGRAVirtualScreen1.Cursor := crSizeN;
+  oecMoveS: BGRAVirtualScreen1.Cursor := crSizeS;
+  oecMoveNE: BGRAVirtualScreen1.Cursor := crSizeNE;
+  oecMoveNW: BGRAVirtualScreen1.Cursor := crSizeNW;
+  oecMoveSW: BGRAVirtualScreen1.Cursor := crSizeSW;
+  oecMoveSE: BGRAVirtualScreen1.Cursor := crSizeSE;
+  end;
 end;
 
 end.
