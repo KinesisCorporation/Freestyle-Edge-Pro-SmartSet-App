@@ -332,7 +332,7 @@ type
     slStatusReport: TECSlider;
     lblPlaybackSpeed: TStaticText;
     lblMacroMultiplay: TStaticText;
-    StaticText3: TStaticText;
+    lblCoTrigger: TStaticText;
     lblDisplaying: TStaticText;
     swGameMode: TECSwitch;
     tbMacroSpeed: TTrackBar;
@@ -1023,11 +1023,13 @@ begin
   self.AutoScroll := false; //No scroll bars OSX, does not work well
   self.KeyPreview := true; //traps key presses at form level
   defaultKeyFontName := 'Arial Narrow';
-  defaultKeyFontSize := 12;
+  defaultKeyFontSize := 8;
   SetFont(self, 'Helvetica');
   lblMacro1.Left := rgMacro1.Left - lblMacro1.Width - 5;
   lblMacro2.Left := rgMacro2.Left - lblMacro2.Width - 5;
   lblMacro3.Left := rgMacro3.Left - lblMacro3.Width - 5;
+  lblCoTrigger.Font.Size := 14;
+  lblDisplaying.Font.Size := 16;
   rgMacro1.Top := 1;
   rgMacro2.Top := 1;
   rgMacro3.Top := 1;

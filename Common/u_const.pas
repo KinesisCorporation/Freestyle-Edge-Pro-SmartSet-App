@@ -678,7 +678,7 @@ begin
   ConfigKeys := TKeyList.Create;
 
   smallFontSize := 8;
-  {$ifdef Darwin}smallFontSize := 10;{$endif}
+  //{$ifdef Darwin}smallFontSize := 10;{$endif}
 
   ConfigKeys.Clear;
   //Control keys
