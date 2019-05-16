@@ -15,6 +15,10 @@ type
   private
     FOriginalKey: TKey;
     FModifiedKey: TKey;
+    FTapAction: TKey;
+    FHoldAction: TKey;
+    FTimingDelay: integer;
+    FTapAndHold: boolean;
     FIndex: integer;
     //FButtonName: string;
     FIsModified: boolean;
@@ -33,6 +37,7 @@ type
     procedure SetActiveMacro(macro: TKeyList);
   public
     constructor Create;
+    destructor Destroy; override;
     constructor Create(oOriginalKey: TKey; iIndex: integer; bCanEdit: boolean = true; bCanAssignMacro: boolean = true);
     procedure ResetKey;
     procedure Assign(aKbKey: TKBKey; restoreType: TRestoreType);
@@ -40,9 +45,13 @@ type
 
     property OriginalKey: TKey read FOriginalKey write FOriginalKey;
     property ModifiedKey: TKey read FModifiedKey write FModifiedKey;
+    property TapAction: TKey read FTapAction write FTapAction;
+    property HoldAction: TKey read FHoldAction write FHoldAction;
+    property TimingDelay: integer read FTimingDelay write FTimingDelay;
     property Index: integer read FIndex write FIndex;
     //property ButtonName: string read FButtonName write FButtonName;
     property IsModified: boolean read FIsModified write FIsModified;
+    property TapAndHold: boolean read FTapAndHold write FTapAndHold;
     property IsMacro: boolean read FIsMacro write FIsMacro;
     property CanEdit: boolean read FCanEdit write FCanEdit;
     property CanAssignMacro: boolean read FCanAssignMacro write FCanAssignMacro;
@@ -178,7 +187,10 @@ end;
 procedure TKBKey.ResetKey;
 begin
   FModifiedKey := nil;
+  FTapAction := nil;
+  FHoldAction := nil;
   FIsModified := false;
+  FTapAndHold := false;
   FIsMacro := false;
   FMacro1.Clear;
   FMacro2.Clear;
@@ -194,8 +206,11 @@ begin
     begin
       self.FOriginalKey := aKbKey.OriginalKey.CopyKey;
       self.FModifiedKey := aKbKey.ModifiedKey.CopyKey;
+      self.FTapAction := aKbKey.TapAction.CopyKey;
+      self.FHoldAction := aKbKey.HoldAction.CopyKey;
       self.FIndex := aKbKey.Index;
       self.IsModified := aKbKey.IsModified;
+      self.TapAndHold := aKbKey.TapAndHold;
       self.FCanEdit := aKbKey.CanEdit;
       self.FCanAssignMacro := aKbKey.CanAssignMacro;
     end;
@@ -225,10 +240,29 @@ begin
   Init;
 end;
 
+destructor TKBKey.Destroy;
+begin
+  FreeAndNil(FMacro1);
+  FreeAndNil(FMacro2);
+  FreeAndNil(FMacro3);
+  if (FModifiedKey <> nil) then
+    FreeAndNil(FModifiedKey);
+  if (FOriginalKey <> nil) then
+    FreeAndNil(FOriginalKey);
+  if (FTapAction <> nil) then
+    FreeAndNil(FTapAction);
+  if (FHoldAction <> nil) then
+    FreeAndNil(FHoldAction);
+  inherited Destroy;
+end;
+
 procedure TKBKey.Init;
 begin
   FOriginalKey := nil;
   FModifiedKey := nil;
+  FTapAction := nil;
+  FHoldAction := nil;
+  FTimingDelay := 0;
   FCanEdit := false;
   FCanAssignMacro := true;
   FMacro1 := TKeyList.Create;
