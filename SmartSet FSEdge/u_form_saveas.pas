@@ -78,6 +78,7 @@ begin
       result := ExtractFileNameWithoutExt(FormSaveAs.eCustLayout.Text) + '.txt';
     end;
   end;
+  FormSaveAs := nil;
 end;
 
 { TFormSaveAs }

@@ -135,7 +135,7 @@ type
 
   { TGtk2RichMemoStrings }
 
-  TGtk2RichMemoStrings = class(TStrings)
+  TGtk2RichMemoStrings = class(TGtk2MemoStrings)
   protected
     FGtkText : PGtkTextView;
     FGtkBuf: PGtkTextBuffer;
@@ -562,7 +562,7 @@ end;
 constructor TGtk2RichMemoStrings.Create(TextView: PGtkTextView;
   TheOwner: TWinControl);
 begin
-  inherited Create;
+  inherited Create(TextView, TheOwner);
   if TextView = nil then RaiseGDBException(
     'TGtk2RichMemoStrings.Create Unspecified Text widget');
   FGtkText:= TextView;

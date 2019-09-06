@@ -431,6 +431,7 @@ end;
 destructor TWin32Inline.Destroy;
 begin
   rminline.Free;
+  canvas.free;
   inherited Destroy;
 end;
 

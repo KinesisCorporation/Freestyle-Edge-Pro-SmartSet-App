@@ -10,6 +10,9 @@ uses
   CocoaAll, Classes, SysUtils,
   LCLType, Graphics, Controls, StdCtrls,
   CocoaPrivate, CocoaTextEdits, CocoaUtils, CocoaWSCommon,
+  {$ifndef RMLCL18} // it can be defined in the package's CustomOptions -dRMLCL18
+  CocoaScrollers, // this unit was introduced in summer-fall 2018 with Lazarus 2.0 release
+  {$endif}
   WSRichMemo, RichMemo;
 
 type
@@ -21,11 +24,16 @@ type
   { TCocoaWSCustomRichMemo }
 
   TCocoaWSCustomRichMemo = class(TWSCustomRichMemo)
-  public
+  published
     class function CreateHandle(const AWinControl: TWinControl; const AParams: TCreateParams): TLCLIntfHandle; override;
 
     class function GetTextAttributes(const AWinControl: TWinControl; TextStart: Integer;
       var Params: TIntFontParams): Boolean; override;
+          { Returns True if passed text styles are indentical }
+    class function FPisEqual(const FP, FPRef : TFontParams) : boolean;
+          { Returns with the range (in 0 based bytes) of the style that TextStart is in }
+    class function GetStyleRange(const AWinControl: TWinControl; TextStart: Integer;
+                                       var RangeStart, RangeLen: Integer): Boolean; override;
     class procedure SetTextAttributes(const AWinControl: TWinControl; TextStart, TextLen: Integer;
       const Params: TIntFontParams); override;
 
@@ -49,6 +57,7 @@ type
     class procedure InDelText(const AWinControl: TWinControl;
       const TextUTF8: String; DstStart, DstLen: Integer); override;
     class function LoadRichText(const AWinControl: TWinControl; Source: TStream): Boolean; override;
+    class function SaveRichText(const AWinControl: TWinControl; Dest: TStream): Boolean; override;
   end;
 
 implementation
@@ -212,7 +221,7 @@ begin
   txt.setFrame(nr);
   txt.textContainer.setLineFragmentPadding(0);
 
-  txt.callback := TLCLCommonCallback.Create(txt, AWinControl);
+  txt.callback := TLCLCommonCallback.Create(txt, AWinControl, scr);
   ns := NSStringUtf8(AParams.Caption);
   txt.setString(ns);
   ns.release;
@@ -256,6 +265,44 @@ begin
   Params.HasBkClr:=Assigned(prm.backColor);
   if Params.HasBkClr then
     Params.BkColor:=NSColorToColorRef(prm.backColor);
+  Result:=true;
+end;
+
+
+class function TCocoaWSCustomRichMemo.FPisEqual(const FP, FPRef : TFontParams) : boolean;
+begin                        // DRB - an addition function to help GetStyleRange()
+  Result := false;
+  if (FP.name = FPRef.name) and (FP.size = FPRef.size) and (FP.style = FPRef.style)
+        and (FP.bkColor = FPRef.bkcolor) and (FP.HasBkClr = FPRef.HasBkClr)
+        and (FP.VScriptPos = FPRef.VScriptPos) then
+  Result := true
+end;
+
+class function TCocoaWSCustomRichMemo.GetStyleRange(const AWinControl: TWinControl;
+                              TextStart: Integer; var RangeStart, RangeLen: Integer): Boolean;
+var
+  txt : TCocoaTextView;
+  TextLength : integer;       // all text, in bytes (2 byte line endings)
+  FPRef, FP : TIntFontParams;
+begin                         // DRB - new method to implement GetStypeRange() on Cocoa.
+  Result := False;
+  txt:=MemoTextView(AWinControl);
+  TextLength := txt.textStorage.string_.length;
+  if (TextStart < 0) or (TextStart >= TextLength) then exit;
+  if not GetTextAttributes(AWinControl, TextStart, FPRef) then exit;
+  RangeStart := TextStart;
+  repeat
+        dec(RangeStart);
+        if RangeStart <= 0 then break;
+        if not GetTextAttributes(AWinControl, RangeStart, FP) then exit;
+  until not FPisEqual(FP, FPRef);
+  inc(RangeStart);
+  RangeLen := TextStart - RangeStart;
+  repeat
+        if RangeStart + RangeLen >= TextLength then break;
+        inc(RangeLen);
+        if not GetTextAttributes(AWinControl, RangeStart + RangeLen, FP) then exit;
+  until not FPisEqual(FP, FPRef);
   Result:=true;
 end;
 
@@ -594,6 +641,44 @@ begin
     txt.replaceCharactersInRange_withRTF(rng, data);
     data.release;
   end;
+  Result:=true;
+end;
+
+class function TCocoaWSCustomRichMemo.SaveRichText(
+  const AWinControl: TWinControl; Dest: TStream): Boolean;
+var
+  rng : NSRange;
+  txt : TCocoaTextView;
+  rtf : NSData;
+  sz  : NSUInteger;
+  dt  : PByteArray;
+  i   : NSUInteger;
+  chsz : Integer; // chunk size
+begin
+  //todo: avoid copying data.
+  Result:=false;
+  if not Assigned(Dest) or not Assigned(AWinControl) or (AWinControl.Handle=0) then Exit;
+
+  txt:=MemoTextView(AWinControl);
+
+  rng.length:=txt.textStorage.string_.length;
+  rng.location:=0;
+  rtf:=txt.RTFFromRange(rng);
+  sz :=rtf.length;
+  if (sz>0) then begin
+    dt:=PByteArray(rtf.bytes);
+    i:=0;
+    // have to do all of that, because Stream.Write(,  Int32);
+    // while size can be > 2Gb
+    while sz>0 do begin
+      if sz>MaxInt then chsz:=MaxInt
+      else chsz := sz;
+      Dest.Write(dt[i], chsz);
+      dec(sz, chsz);
+      inc(i, chsz);
+    end;
+  end;
+
   Result:=true;
 end;
 

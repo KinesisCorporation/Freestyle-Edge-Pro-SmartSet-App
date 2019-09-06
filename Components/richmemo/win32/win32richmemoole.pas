@@ -20,8 +20,15 @@ unit Win32RichMemoOle;
 
 interface
 
+{$if FPC_FULLVERSION < 30200}
+{$undef MEDVAR}
+{$else}
+{$define MEDVAR}
+{$endif}
+
 uses
   Windows, ActiveX, ComObj, Win32RichMemoProc;
+
 
 {.$define oledebug}
 
@@ -62,7 +69,9 @@ type
     Function GetDataHere(CONST pformatetc : FormatETC; Out medium : STGMEDIUM):HRESULT; STDCALL;
     Function QueryGetData(const pformatetc : FORMATETC):HRESULT; STDCALL;
     Function GetCanonicalFormatEtc(const pformatetcIn : FORMATETC;Out pformatetcOut : FORMATETC):HResult; STDCALl;
-    Function SetData (Const pformatetc : FORMATETC;const medium:STGMEDIUM;FRelease : BOOL):HRESULT; StdCall;
+    Function SetData (Const pformatetc : FORMATETC;
+      {$ifdef MEDVAR}var{$ELSE}const{$ENDIF} medium:STGMEDIUM;
+      FRelease : BOOL):HRESULT; StdCall;
     Function EnumFormatEtc(dwDirection : DWord; OUT enumformatetcpara : IENUMFORMATETC):HRESULT; StdCall;
     Function DAdvise(const formatetc : FORMATETC;advf :DWORD; CONST AdvSink : IAdviseSink;OUT dwConnection:DWORD):HRESULT;StdCall;
     Function DUnadvise(dwconnection :DWord) :HRESULT;StdCall;
@@ -261,7 +270,8 @@ begin
 end;
 
 function TCustomDataObject.SetData(const pformatetc: FORMATETC;
-  const medium: STGMEDIUM; FRelease: BOOL): HRESULT; StdCall;
+  {$ifdef MEDVAR}var{$ELSE}const{$ENDIF} medium: STGMEDIUM;
+  FRelease: BOOL): HRESULT; StdCall;
 begin
   {$ifdef oledebug}writeln('IDataObject.SetData');{$endif}
   Result:=S_OK;

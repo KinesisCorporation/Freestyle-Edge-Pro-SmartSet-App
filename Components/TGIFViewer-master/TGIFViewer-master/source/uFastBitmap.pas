@@ -603,10 +603,16 @@ Var
   ImgFormatDescription: TRawImageDescription;
   W,H,X,Y : Integer;
   SrcPix : PColor32;
+  BmpHandle: HBitmap;
+  MskHandle: HBitmap;
+  Buffer: PByte;
+  RawImage: TRawImage;
 Begin
-
-  (* /!\ Le code si dessous fonctionne parfaitement sous Windows et Mac.
-     Mais sous Linux ce code produit des erreur au niveau de la transparence
+  //JM - Activate this code, bug with OSX 64bit
+  {$IFNDEF LINUX}
+  Result := nil;
+  // Le code si dessous fonctionne parfaitement sous Windows et Mac.
+  //   Mais sous Linux ce code produit des erreur au niveau de la transparence
 
     BmpHandle := 0;
     MskHandle := 0;
@@ -639,8 +645,9 @@ Begin
       //temp.TransparentMode := tmAuto;
       Result := Temp;
     End;
-  *)
 
+  {$endif}
+  {$IFDEF LINUX}
   Result := nil;
 
   W := FWidth;
@@ -665,6 +672,8 @@ Begin
     Result := Temp;
     IntfBmp.Free;
   End;
+  {$endif}
+
   if Result = nil then
     Raise Exception.Create(rsBitmapCreateError);
 End;
@@ -724,6 +733,11 @@ begin
     try
       BufferData := PByte(Self.getSurfaceBuffer);
       Move(ARawImage.Data^, BufferData^, self.Size);
+      {$IFDEF WINDOWS}
+        if (ARawImage.Description.RedShift = 0) and ((ARawImage.Description.BlueShift = 16)) then Self.SwapRB; // Le RawImage est-il en RGB, si oui on échange
+      {$ELSE}
+        if (ARawImage.Description.RedShift = 16) and ((ARawImage.Description.BlueShift = 0)) then Self.SwapRB; // Le RawImage est-il en BGR, si oui on échange
+      {$ENDIF}
     finally
       result:=true;
     end;
@@ -734,14 +748,17 @@ Function TFastBitmap.ImportFromBitmap(Const ABitmap: Graphics.TBitmap): Boolean;
 var
   LTempBitmap: Graphics.TBitmap;
   ok,ResetAlpha:Boolean;
+
   procedure SetAlpha(Value : Byte);
   var
     i : Integer;
     PixPtr : PColor32;
+    maxi : Integer;
   begin
     i:=0;
-    PixPtr := Self.GetScanLine(0);
-    While i<FSize-1 do
+    Maxi := (FWidth * FHeight)-1;
+    PixPtr :=PColor32(FData);// Self.GetScanLine(0);
+    While i<Maxi do
     begin
       PixPtr^.Alpha:= Value;
       inc(PixPtr);
@@ -757,8 +774,8 @@ begin
     LTempBitmap := Graphics.TBitmap.Create;
     try
       ResetAlpha:=True;
-      LTempBitmap.PixelFormat := pf32bit;
       LTempBitmap.SetSize(ABitmap.Width, ABitmap.Height);
+      LTempBitmap.PixelFormat := pf32bit;
       LTempBitmap.Canvas.Draw(0, 0, ABitmap);
     finally
       ok:=Self.ImportFromRawImage(LTempBitmap.RawImage);

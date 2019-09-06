@@ -11,7 +11,7 @@ uses
   ECSlider, HSSpeedButton, RichMemo, u_keys, userdialog, contnrs, u_form_about,
   LazUTF8, u_form_saveas, u_form_load, u_form_timingdelays
   {$ifdef Win32},Windows{$endif}
-  {$ifdef Darwin}, MacOSAll, CarbonDef, CarbonProc{$endif};
+  {$ifdef Darwin}, MacOSAll{, CarbonDef, CarbonProc}{$endif};
 
 type
 
@@ -43,6 +43,9 @@ type
     btnSave: THSSpeedButton;
     btnSaveAs: THSSpeedButton;
     btnNew: THSSpeedButton;
+    lblCoTrigger: TLabel;
+    lblMacroInfo: TLabel;
+    lblDisplaying: TLabel;
     miCustomDelayM: TMenuItem;
     miRandomDelaysM: TMenuItem;
     slMacroSpeed: TECSlider;
@@ -151,7 +154,7 @@ type
     LabelBox95: TLabelBox;
     LabelBox96: TLabelBox;
     LabelBox97: TLabelBox;
-    lblMacroInfo: TStaticText;
+    lblMacroInfo2: TStaticText;
     lblGlobal0: TStaticText;
     lblPSGlobal: TStaticText;
     lblGlobal17: TStaticText;
@@ -332,8 +335,8 @@ type
     slStatusReport: TECSlider;
     lblPlaybackSpeed: TStaticText;
     lblMacroMultiplay: TStaticText;
-    lblCoTrigger: TStaticText;
-    lblDisplaying: TStaticText;
+    lblCoTrigger2: TStaticText;
+    lblDisplaying2: TStaticText;
     swGameMode: TECSwitch;
     tbMacroSpeed: TTrackBar;
     tbMultiplay: TTrackBar;
@@ -1024,16 +1027,16 @@ begin
   self.KeyPreview := true; //traps key presses at form level
   defaultKeyFontName := 'Arial Narrow';
   defaultKeyFontSize := 8;
-  SetFont(self, 'Helvetica');
+  //SetFont(self, 'Helvetica');
   lblMacro1.Left := rgMacro1.Left - lblMacro1.Width - 5;
   lblMacro2.Left := rgMacro2.Left - lblMacro2.Width - 5;
   lblMacro3.Left := rgMacro3.Left - lblMacro3.Width - 5;
-  lblCoTrigger.Font.Size := 14;
-  lblDisplaying.Font.Size := 16;
-  rgMacro1.Top := 1;
-  rgMacro2.Top := 1;
-  rgMacro3.Top := 1;
-  lblDisplaying.Left := lblMacro1.Left - lblDisplaying.Width - 5;
+  //lblCoTrigger2.Font.Size := 14;
+  //lblDisplaying.Font.Size := 16;
+  //rgMacro1.Top := 1;
+  //rgMacro2.Top := 1;
+  //rgMacro3.Top := 1;
+  //lblDisplaying.Left := lblMacro1.Left - lblDisplaying2.Width - 5;
   lblLayer.Top := lblLayer.Top + 2;
   btnHelpIcon.Left := btnClose.Left;
   btnBackspace.Caption := 'Delete';

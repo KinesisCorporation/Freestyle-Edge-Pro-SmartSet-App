@@ -4,6 +4,10 @@ interface
 
 {$mode delphi}
 
+{$define RMQT5_TEXTFORMATS} // the feature is available in Qt5 Trunk
+                            // it allows to query Qt5TextEdit for character formats array
+{$ifdef RMQT5_NOTEXTFORMATS}{$undef RMQT5_TEXTFORMATS}{$endif}
+
 //
 // Following class methods are need for the implementation
 //  QTextCharFormatH
@@ -31,7 +35,25 @@ type
       const Params: TIntFontParams); override;
 
     class function Search(const AWinControl: TWinControl; const ANiddle: string; const SearchOpts: TIntSearchOpt): Integer; override;
+
+    class function isInternalChange(const AWinControl: TWinControl; Params: TTextModifyMask
+      ): Boolean; override;
+    class procedure SetTextAttributesInternal(const AWinControl: TWinControl; TextStart, TextLen: Integer;
+      const AModifyMask: TTextModifyMask; const Params: TIntFontParams); override;
+
+    class function GetStyleRange(const AWinControl: TWinControl; TextStart: Integer; var RangeStart, RangeLen: Integer): Boolean; override;
+
   end;
+
+type
+  TEditorState = record
+    selst  : integer; // selection start
+    sellen : integer; // selection length
+  end;
+
+// no sanity check is done in these functions
+procedure MakeBackup(te: TQtTextEdit; out backup: TEditorState);
+procedure ApplyBackup(te: TQtTextEdit; const backup: TEditorState);
 
 implementation
 
@@ -106,9 +128,9 @@ class function TQtWSCustomRichMemo.GetTextAttributes(
 var
   w : QTextEditH;
   te : TQtTextEdit;
-  ss, sl :  Integer;
   ws : WideString;
   clr: TQColor;
+  bck : TEditorState;
 begin
   InitFontParams(Params);
   if not WSCheckHandleAllocated(AWinControl, 'GetTextAttributes') then begin
@@ -119,16 +141,14 @@ begin
   te:=TQtTextEdit(AWinControl.Handle);
   w:=QTextEditH(te.Widget);
 
-  ss:=te.getSelectionStart;
-  sl:=te.getSelectionLength;
+  MakeBackup(te, bck);
 
   te.setSelection(TextStart, 1);
 
   //todo!
   ws:='';
   QTextEdit_fontFamily(w, @ws);
-  writeln(wS);
-  if ws<>'' then Params.Name:=ws;
+  if ws<>'' then Params.Name:=UTF8Encode(ws);
 
   Params.Size:=round(QTextEdit_fontPointSize(w));
   if QTextEdit_fontWeight(w)>=QBold then Include(Params.Style, fsBold);
@@ -145,7 +165,8 @@ begin
   //todo!
   params.HasBkClr:=false;
 
-  te.setSelection(ss, sl);
+  ApplyBackup(te, bck);
+
   Result:=true;
 end;
 
@@ -221,6 +242,79 @@ begin
   else Result:=-1;
 end;
 
+class function TQtWSCustomRichMemo.isInternalChange(
+  const AWinControl: TWinControl; Params: TTextModifyMask): Boolean;
+begin
+  Result := false;
+
+  //Result:=inherited isInternalChange(AWinControl, Params);
+end;
+
+class procedure TQtWSCustomRichMemo.SetTextAttributesInternal(
+  const AWinControl: TWinControl; TextStart, TextLen: Integer;
+  const AModifyMask: TTextModifyMask; const Params: TIntFontParams);
+begin
+  SetTextAttributes(AWinControl, TextStart, TextLen, Params);
+end;
+
+class function TQtWSCustomRichMemo.GetStyleRange(
+  const AWinControl: TWinControl; TextStart: Integer; var RangeStart,
+  RangeLen: Integer): Boolean;
+var
+  te : TQtTextEdit;
+  bck : TEditorState;
+  al : QtAlignment;
+  qcur : QTextCursorH;
+  qblck : QTextBlockH;
+  qbfmt : QTextBlockFormatH;
+  i   : integer;
+  cnt : integer;
+  rng : array of TTextRange;
+  blckofs: integer;
+begin
+  if not WSCheckHandleAllocated(AWinControl, 'GetStyleRange') then begin
+    Result:=false;
+    Exit;
+  end;
+
+  RangeStart:=TextStart;
+  RangeLen:=1;
+  Result:=true;
+  {$ifndef RMQT5_TEXTFORMATS}
+  Exit;
+  {$else}
+  te:=TQtTextEdit(AWinControl.Handle);
+
+  MakeBackup(te, bck);
+  qcur := QTextCursor_Create();
+  qblck := QTextBlock_Create();
+  try
+    te.setSelection(TextStart, 0);
+    QTextEdit_textCursor(QTextEditH(te.Widget), qcur);
+    QTextCursor_block(qcur, qblck);
+
+    cnt := QTextBlock_textFormatsCount(qblck);
+    SetLength(rng, cnt);
+    if cnt>0 then begin
+      blckofs := QTextBlock_position(qblck);
+      textStart := textStart - blckofs;
+      for i:=0 to cnt-1 do begin
+        if (textStart >= rng[i].start) and (textStart<rng[i].start+rng[i].length) then
+        begin
+          RangeStart := rng[i].start + blckofs;
+          RangeLen := rng[i].length;
+          break;
+        end;
+      end;
+    end;
+  finally
+    QTextBlock_Destroy(qblck);
+    QTextCursor_Destroy(qcur);
+    ApplyBackup(te, bck);
+  end;
+  {$endif}
+end;
+
 class function TQtWSCustomRichMemo.GetParaAlignment(
   const AWinControl: TWinControl; TextStart: Integer;
   var AAlign: TIntParaAlignment): Boolean;
@@ -240,6 +334,17 @@ begin
   else if QtAlignJustify and al > 0 then AAlign:=paJustify
   else AAlign:=paLeft;
   Result:=true;
+end;
+
+procedure MakeBackup(te: TQtTextEdit; out backup: TEditorState);
+begin
+  backup.selst:=te.getSelectionStart;
+  backup.sellen:=te.getSelectionLength;
+end;
+
+procedure ApplyBackup(te: TQtTextEdit; const backup: TEditorState);
+begin
+  te.setSelection(backup.selst, backup.sellen);
 end;
 
 end.
