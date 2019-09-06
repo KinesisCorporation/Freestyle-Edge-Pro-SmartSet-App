@@ -1066,23 +1066,23 @@ begin
   tbSpeed.Visible := false;
 
   //Slider settings
-  lblPS2.Left := lblPSGlobal.Left + SliderSeparator;
-  lblPS4.Left := lblPS2.Left + SliderSeparator;
-  lblPS6.Left := lblPS4.Left + SliderSeparator + 2;
-  lblPS8.Left := lblPS6.Left + SliderSeparator;
+  //lblPS2.Left := lblPSGlobal.Left + SliderSeparator;
+  //lblPS4.Left := lblPS2.Left + SliderSeparator;
+  //lblPS6.Left := lblPS4.Left + SliderSeparator + 2;
+  //lblPS8.Left := lblPS6.Left + SliderSeparator;
   //lblMM2.Left := lblMMGlobal.Left + SliderSeparator;
   //lblMM4.Left := lblMM2.Left + SliderSeparator;
   //lblMM6.Left := lblMM4.Left + SliderSeparator + 2;
   //lblMM8.Left := lblMM6.Left + SliderSeparator;
-  //lblMacroMultiplay_2.Top := lblMacroMultiplay_2.Top - 2;
-  slMacroMultiplay.Top := slMacroMultiplay.Top - 2;
-  //lblPlaybackSpeed_2.Top := lblPlaybackSpeed_2.Top - 2;
-  slPlaybackSpeed.Top := slPlaybackSpeed.Top - 2;
+  lblMacroMultiplay.Top := lblMacroMultiplay.Top - 2;
+  //slMacroMultiplay.Top := slMacroMultiplay.Top - 3;
+  lblPlaybackSpeed.Top := lblPlaybackSpeed.Top - 2;
+  //slPlaybackSpeed.Top := slPlaybackSpeed.Top - 3;
 
-  lblGlobalMacroSpeed.Top := lblGlobalMacroSpeed.Top - 2;
-  slMacroSpeed.Top := slMacroSpeed.Top - 2;
-  lblStatusReport.Top := lblStatusReport.Top - 2;
-  slStatusReport.Top := slStatusReport.Top - 2;
+  lblGlobalMacroSpeed.Top := lblGlobalMacroSpeed.Top - 3;
+  slMacroSpeed.Top := slMacroSpeed.Top - 3;
+  lblStatusReport.Top := lblStatusReport.Top - 3;
+  slStatusReport.Top := slStatusReport.Top - 3;
 
   //btnClose.Left := 10;
   //btnMinimize.Left := btnClose.Left + btnClose.Width;
