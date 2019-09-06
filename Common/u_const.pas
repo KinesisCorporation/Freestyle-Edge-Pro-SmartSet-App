@@ -218,8 +218,10 @@ const
   VK_KP_PERI = 10070;
   //FOR ADVANTAGE 2
   VK_MIN_DELAY = 10071; //Minimum timing delay (1)
-  VK_MAX_DELAY = 10170; //Maximum timing delay (999)
-  VK_RAND_DELAY = 10171; //Random timing delay
+  VK_MAX_DELAY = 11070; //Maximum timing delay (999)
+  VK_RAND_DELAY = 11071; //Random timing delay
+  VK_HYPER = 11072; //Multimodifier
+  VK_MEH = 11073; //Multimodifier
 
   MAPVK_VK_TO_VSC = 0;
   MAPVK_VSC_TO_VK = 1;
@@ -372,6 +374,9 @@ const
   ADV2_4MB = '4MB';
   MIN_TIMING_DELAY = 1;
   MAX_TIMING_DELAY = 999;
+  TAP_AND_HOLD = 't&h';
+  DEFAULT_SPEED_TAP_HOLD = 250;
+  MAX_TAP_HOLD = 10;
 
 implementation
 
@@ -686,25 +691,25 @@ begin
     ConfigKeys.Add(TKey.Create(VK_ESCAPE, 'esc', 'Esc'))
   else
     ConfigKeys.Add(TKey.Create(VK_ESCAPE, 'escape', 'Esc'));
-  ConfigKeys.Add(TKey.Create(VK_PAUSE, 'pause', 'Pause' + #10 + 'Break', '', '', '', false, false, '', true, false, smallFontSize));
-  ConfigKeys.Add(TKey.Create(VK_PRINT, 'prtscr', 'Print' + #10 + 'Scrn', '', '', '', false, false, '', true, false, smallFontSize)); //Old print key...
+  ConfigKeys.Add(TKey.Create(VK_PAUSE, 'pause', 'Pause' + #10 + 'Break', '', '', '', false, false, '', true, false, smallFontSize, '', 'Pause Break'));
+  ConfigKeys.Add(TKey.Create(VK_PRINT, 'prtscr', 'Print' + #10 + 'Scrn', '', '', '', false, false, '', true, false, smallFontSize, '', 'Print Scrn')); //Old print key...
   if (GApplication in [APPL_FSEDGE, APPL_FSPRO]) then
-    ConfigKeys.Add(TKey.Create(VK_SNAPSHOT, 'prnt', 'Print' + #10 + 'Scrn', '', '', '', false, false, '', true, false, smallFontSize)) //Print screen key
+    ConfigKeys.Add(TKey.Create(VK_SNAPSHOT, 'prnt', 'Print' + #10 + 'Scrn', '', '', '', false, false, '', true, false, smallFontSize ,'', 'Print Scrn')) //Print screen key
   else
-    ConfigKeys.Add(TKey.Create(VK_SNAPSHOT, 'prtscr', 'Print' + #10 + 'Scrn', '', '', '', false, false, '', true, false, smallFontSize)); //Print screen key
+    ConfigKeys.Add(TKey.Create(VK_SNAPSHOT, 'prtscr', 'Print' + #10 + 'Scrn', '', '', '', false, false, '', true, false, smallFontSize, '', 'Print Scrn')); //Print screen key
   if (GApplication in [APPL_FSEDGE, APPL_FSPRO]) then
-    ConfigKeys.Add(TKey.Create(VK_SCROLL, 'scrlk', 'Scroll' + #10 + 'Lock', '', '', '', false, false, '', true, false, smallFontSize))
+    ConfigKeys.Add(TKey.Create(VK_SCROLL, 'scrlk', 'Scroll' + #10 + 'Lock', '', '', '', false, false, '', true, false, smallFontSize, '', 'Scroll Lock'))
   else
-    ConfigKeys.Add(TKey.Create(VK_SCROLL, 'scroll', 'Scroll' + #10 + 'Lock', '', '', '', false, false, '', true, false, smallFontSize));
+    ConfigKeys.Add(TKey.Create(VK_SCROLL, 'scroll', 'Scroll' + #10 + 'Lock', '', '', '', false, false, '', true, false, smallFontSize, '', 'Scroll Lock'));
   ConfigKeys.Add(TKey.Create(VK_TAB, 'tab', 'Tab'));
-  ConfigKeys.Add(TKey.Create(VK_CAPITAL, 'caps', 'Caps' + #10 + 'Lock', '', '', '', false, false, '', true, false, smallFontSize));
+  ConfigKeys.Add(TKey.Create(VK_CAPITAL, 'caps', 'Caps' + #10 + 'Lock', '', '', '', false, false, '', true, false, smallFontSize, '', 'Caps Lock'));
   //When multi-key and no modifiers, show empty space
   if (GApplication in [APPL_FSEDGE, APPL_FSPRO]) then
     ConfigKeys.Add(TKey.Create(VK_SPACE, 'spc', 'Space', 'spc', ' '))
   else
     ConfigKeys.Add(TKey.Create(VK_SPACE, 'space', 'Space', 'space', ' '));///UTFString(#$e2#$90#$a3)));
-  ConfigKeys.Add(TKey.Create(VK_LSPACE, 'lspc', 'Space', 'lspc', ' ')); //User-Defined key for FSEdge
-  ConfigKeys.Add(TKey.Create(VK_RSPACE, 'rspc', 'Space', 'rspc', ' ')); //User-Defined key for FSEdge
+  ConfigKeys.Add(TKey.Create(VK_LSPACE, 'lspc', 'Space', 'lspc', ' ', '', false, false, '', true, false, 0, '', 'Left Space')); //User-Defined key for FSEdge
+  ConfigKeys.Add(TKey.Create(VK_RSPACE, 'rspc', 'Space', 'rspc', ' ', '', false, false, '', true, false, 0, '', 'Right Space')); //User-Defined key for FSEdge
   if (GApplication in [APPL_FSEDGE, APPL_FSPRO]) then
     ConfigKeys.Add(TKey.Create(VK_INSERT, 'insert', 'Insert', 'ins'))
   else
@@ -712,10 +717,10 @@ begin
   ConfigKeys.Add(TKey.Create(VK_HOME, 'home', 'Home'));
   ConfigKeys.Add(TKey.Create(VK_END, 'end', 'End'));
   if (GApplication in [APPL_FSEDGE, APPL_FSPRO]) then
-    ConfigKeys.Add(TKey.Create(VK_NEXT, 'pdn', 'Page' + #10 + 'Down'))
+    ConfigKeys.Add(TKey.Create(VK_NEXT, 'pdn', 'Page' + #10 + 'Down', '', '', '', false, false, '', true, false, 0, '', 'Page Down'))
   else
-    ConfigKeys.Add(TKey.Create(VK_NEXT, 'pdown', 'Page' + #10 + 'Down'));
-  ConfigKeys.Add(TKey.Create(VK_PRIOR, 'pup', 'Page' + #10 + 'Up'));
+    ConfigKeys.Add(TKey.Create(VK_NEXT, 'pdown', 'Page' + #10 + 'Down', '', '', '', false, false, '', true, false, 0, '', 'Page Down'));
+  ConfigKeys.Add(TKey.Create(VK_PRIOR, 'pup', 'Page' + #10 + 'Up', '', '', '', false, false, '', true, false, 0, '', 'Page Up'));
 
   if (GApplication in [APPL_FSEDGE, APPL_FSPRO]) then
     ConfigKeys.Add(TKey.Create(VK_RIGHT, 'rght', UnicodeToUTF8(8594), '', '', '', false, false, '', true, false, 10, UNICODE_FONT))
@@ -740,13 +745,13 @@ begin
   ConfigKeys.Add(TKey.Create(VK_SHIFT, 'Shift', 'Shift', 'shift'));
   if (GApplication in [APPL_FSEDGE, APPL_FSPRO]) then
   begin
-    ConfigKeys.Add(TKey.Create(VK_LSHIFT, 'lshift', 'Left' + #10 + 'Shift', 'lshft'));
-    ConfigKeys.Add(TKey.Create(VK_RSHIFT, 'rshift', 'Right' + #10 + 'Shift', 'rshft'));
+    ConfigKeys.Add(TKey.Create(VK_LSHIFT, 'lshift', 'Left' + #10 + 'Shift', 'lshft', '', '', false, false, '', true, false, 0, '', 'Left Shift'));
+    ConfigKeys.Add(TKey.Create(VK_RSHIFT, 'rshift', 'Right' + #10 + 'Shift', 'rshft', '', '', false, false, '', true, false, 0, '', 'Right Shift'));
   end
   else
   begin
-    ConfigKeys.Add(TKey.Create(VK_LSHIFT, 'lshift', 'Left' + #10 + 'Shift'));
-    ConfigKeys.Add(TKey.Create(VK_RSHIFT, 'rshift', 'Right' + #10 + 'Shift'));
+    ConfigKeys.Add(TKey.Create(VK_LSHIFT, 'lshift', 'Left' + #10 + 'Shift', '', '', '', false, false, '', true, false, 0, '', 'Left Shift'));
+    ConfigKeys.Add(TKey.Create(VK_RSHIFT, 'rshift', 'Right' + #10 + 'Shift', '', '', '', false, false, '', true, false, 0, '', 'Right Shift'));
   end;
   ConfigKeys.Add(TKey.Create(VK_CONTROL, 'Ctrl', 'Ctrl', 'ctrl'));
   //if (GApplication in [APPL_FSEDGE, APPL_FSPRO]) then
@@ -756,11 +761,11 @@ begin
   //end
   //else
   //begin
-    ConfigKeys.Add(TKey.Create(VK_LCONTROL, 'lctrl', 'Left' + #10 + 'Ctrl'{$ifdef Darwin}, '', '', '', false, false, '', true, False, 0, '', 'Left Control' {$endif} ));
-    ConfigKeys.Add(TKey.Create(VK_RCONTROL, 'rctrl', 'Right' + #10 + 'Ctrl'{$ifdef Darwin}, '', '', '', false, false, '', true, False, 0, '', 'Right Control' {$endif} ));
+    ConfigKeys.Add(TKey.Create(VK_LCONTROL, 'lctrl', 'Left' + #10 + 'Ctrl', '', '', '', false, false, '', true, False, 0, '', 'Left Control'));
+    ConfigKeys.Add(TKey.Create(VK_RCONTROL, 'rctrl', 'Right' + #10 + 'Ctrl', '', '', '', false, false, '', true, False, 0, '', 'Right Control'));
   //end;
-  ConfigKeys.Add(TKey.Create(VK_NUMLOCK, 'numlk', 'Num' + #10 + 'Lock'));
-  ConfigKeys.Add(TKey.Create(VK_KP_NUMLCK, 'numlk', 'Num' + #10 + 'Lock'));
+  ConfigKeys.Add(TKey.Create(VK_NUMLOCK, 'numlk', 'Num' + #10 + 'Lock', '', '', '', false, false, '', true, false, 0, '', 'Num Lock'));
+  ConfigKeys.Add(TKey.Create(VK_KP_NUMLCK, 'numlk', 'Num' + #10 + 'Lock', '', '', '', false, false, '', true, false, 0, '', 'Num Lock'));
   //Windows
   {$ifdef Win32}
 
@@ -769,9 +774,9 @@ begin
   else
     ConfigKeys.Add(TKey.Create(VK_RETURN, 'enter', ' Enter'));
   if (GApplication in [APPL_FSEDGE, APPL_FSPRO]) then
-    ConfigKeys.Add(TKey.Create(VK_BACK, 'bspc',  'Back' + #10 + 'Space'))
+    ConfigKeys.Add(TKey.Create(VK_BACK, 'bspc',  'Back' + #10 + 'Space', '', '', '', false, false, '', true, false, 0, '', 'Backspace'))
   else
-    ConfigKeys.Add(TKey.Create(VK_BACK, 'bspace',  'Back' + #10 + 'Space'));
+    ConfigKeys.Add(TKey.Create(VK_BACK, 'bspace',  'Back' + #10 + 'Space', '', '', '', false, false, '', true, false, 0, '', 'Backspace'));
   if (GApplication in [APPL_FSEDGE, APPL_FSPRO]) then
     ConfigKeys.Add(TKey.Create(VK_DELETE, 'del', 'Delete'))
   else
@@ -786,8 +791,8 @@ begin
   //end
   //else
   //begin
-    ConfigKeys.Add(TKey.Create(VK_LMENU, 'lalt', 'Left' + #10 + 'Alt'));
-    ConfigKeys.Add(TKey.Create(VK_RMENU, 'ralt', 'Right' + #10 + 'Alt'));
+    ConfigKeys.Add(TKey.Create(VK_LMENU, 'lalt', 'Left' + #10 + 'Alt', '', '', '', false, false, '', true, false, 0, '', 'Left Alt'));
+    ConfigKeys.Add(TKey.Create(VK_RMENU, 'ralt', 'Right' + #10 + 'Alt', '', '', '', false, false, '', true, false, 0, '', 'Right Alt'));
   //end;
   if (GApplication = APPL_PEDAL) then
   begin
@@ -801,8 +806,8 @@ begin
   //end
   else
   begin
-    ConfigKeys.Add(TKey.Create(VK_LWIN, 'lwin', 'Left' + #10 + 'Win'));
-    ConfigKeys.Add(TKey.Create(VK_RWIN, 'rwin', 'Right' + #10 + 'Win'));
+    ConfigKeys.Add(TKey.Create(VK_LWIN, 'lwin', 'Left' + #10 + 'Win', '', '', '', false, false, '', true, false, 0, '', 'Left Win'));
+    ConfigKeys.Add(TKey.Create(VK_RWIN, 'rwin', 'Right' + #10 + 'Win', '', '', '', false, false, '', true, false, 0, '', 'Right Win'));
   end;
   {$endif}
 
@@ -939,7 +944,7 @@ begin
     ConfigKeys.Add(TKey.Create(VK_KP_PLUS, 'kp+', '+', 'kpplus'));
     ConfigKeys.Add(TKey.Create(VK_DECIMAL, 'kp.', '.'));
     ConfigKeys.Add(TKey.Create(VK_KP_PERI, 'kp.', '.'));
-    ConfigKeys.Add(TKey.Create(VK_NUMPADENTER, 'kpenter', 'Kp' + #10 + 'Enter', 'kpenter'));
+    ConfigKeys.Add(TKey.Create(VK_NUMPADENTER, 'kpenter', 'Kp' + #10 + 'Enter', 'kpenter', '', '', false, false, '', true, false, 0, '', 'Kp Enter'));
     //ConfigKeys.Add(TKey.Create(VK_OEM_NEC_EQUAL, 'kp=', '='));
     ConfigKeys.Add(TKey.Create(VK_KP_EQUAL, 'kp=', '='));
   end;
@@ -1091,6 +1096,8 @@ begin
   ConfigKeys.Add(TKey.Create(VK_LPEDAL, 'lp-tab', 'Tab'));
   ConfigKeys.Add(TKey.Create(VK_MPEDAL, 'mp-kpshf', 'Kp' + #10 + 'Shift'));
   ConfigKeys.Add(TKey.Create(VK_RPEDAL, 'rp-kpent', 'Kp' + #10 + 'Enter'));
+  ConfigKeys.Add(TKey.Create(VK_HYPER, 'hyper', 'Hyper'));
+  ConfigKeys.Add(TKey.Create(VK_MEH, 'meh', 'Meh'));
 
   //FOR ADVANTAGE 2 KEYBOARD
   ConfigKeys.Add(TKey.Create(VK_KP_KPSHIFT, 'kpshft', 'Kp' + #10 + 'Shift', '', '', '', false, false, '', true, false, smallFontSize));

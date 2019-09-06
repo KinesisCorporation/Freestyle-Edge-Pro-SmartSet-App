@@ -9,9 +9,9 @@ uses
   lcltype, Menus, ExtCtrls, Buttons, lclintf, ComCtrls, u_const, u_key_service,
   u_key_layer, u_file_service, LabelBox, LineObj, uEKnob, ueled, ECSwitch,
   ECSlider, HSSpeedButton, RichMemo, u_keys, userdialog, contnrs, u_form_about,
-  LazUTF8, u_form_saveas, u_form_load, u_form_timingdelays
+  LazUTF8, u_form_saveas, u_form_load, u_form_timingdelays, u_form_tapandhold
   {$ifdef Win32},Windows{$endif}
-  {$ifdef Darwin}, MacOSAll{, CarbonDef, CarbonProc}{$endif};
+  {$ifdef Darwin}, MacOSAll, CarbonDef, CarbonProc{$endif};
 
 type
 
@@ -43,9 +43,10 @@ type
     btnSave: THSSpeedButton;
     btnSaveAs: THSSpeedButton;
     btnNew: THSSpeedButton;
-    lblCoTrigger: TLabel;
-    lblMacroInfo: TLabel;
-    lblDisplaying: TLabel;
+    miTapHold: TMenuItem;
+    miMeh: TMenuItem;
+    miHyper: TMenuItem;
+    MenuItem3: TMenuItem;
     miCustomDelayM: TMenuItem;
     miRandomDelaysM: TMenuItem;
     slMacroSpeed: TECSlider;
@@ -154,7 +155,7 @@ type
     LabelBox95: TLabelBox;
     LabelBox96: TLabelBox;
     LabelBox97: TLabelBox;
-    lblMacroInfo2: TStaticText;
+    lblMacroInfo: TStaticText;
     lblGlobal0: TStaticText;
     lblPSGlobal: TStaticText;
     lblGlobal17: TStaticText;
@@ -335,8 +336,8 @@ type
     slStatusReport: TECSlider;
     lblPlaybackSpeed: TStaticText;
     lblMacroMultiplay: TStaticText;
-    lblCoTrigger2: TStaticText;
-    lblDisplaying2: TStaticText;
+    lblCoTrigger: TStaticText;
+    lblDisplaying: TStaticText;
     swGameMode: TECSwitch;
     tbMacroSpeed: TTrackBar;
     tbMultiplay: TTrackBar;
@@ -456,12 +457,14 @@ type
     settingLedMode: boolean;
     remapCount: integer;
     macroCount: integer;
+    tapHoldCount: integer;
     maxMacros : integer;
     maxKeystrokes : integer;
     totalKeystrokes: integer;
 
     function DoneKey: boolean;
     function DoneMacro: boolean;
+    procedure OpenTapAndHold;
     procedure SetConfigOS;
     procedure SetKeyboardHook;
     procedure RemoveKeyboardHook;
@@ -514,13 +517,13 @@ type
     function ValidateBeforeSave: boolean;
   public
     { public declarations }
+    keyService: TKeyService;
+    fileService: TFileService;
   end;
 
 
 var
   FormMain: TFormMain;
-  keyService: TKeyService;
-  fileService: TFileService;
   NeedInput: boolean;
   lastKeyDown: word;
   KBHook: HHook;
@@ -549,14 +552,16 @@ var
   scanCode: longint;
 begin
   //If we need keyboard input (ex: file prompt) allow key presses
-  if NeedInput then
+  if NeedInput or
+    ((FormTapAndHold <> nil) and FormTapAndHold.eTimingDelay.Focused) then
   begin
     Result := CallNextHookEx(WH_KEYBOARD, Code, wParam, lParam);
     exit;
   end;
 
-  //If entering speed, do nothing
-  if (not FormMain.Active) then
+  if (not FormMain.Active) and
+    not((FormTapAndHold <> nil) and FormTapAndHold.Active and
+    (FormTapAndHold.eTapAction.Focused or FormTapAndHold.eHoldAction.Focused)) then
     exit;
 
   currentKey := wParam;
@@ -607,7 +612,7 @@ begin
       begin
         //If key is different then last pressed key (hasn't been released yet)
         if currentKey <> lastKeyPressed then
-          SetKeyPress(currentKey, keyService.GetModifierText);
+          SetKeyPress(currentKey, FormMain.keyService.GetModifierText);
 
         //To prevent Windows from passing the keystrokes  to the target window, the Result value must  be a nonzero value.
         Result := 1;
@@ -618,7 +623,7 @@ begin
       else
       begin
         //Adds modifier to list of active modifiers
-        keyService.AddModifier(currentKey);
+        FormMain.keyService.AddModifier(currentKey);
       end;
     end
     else if (Transition = tsReleased) then //On key up
@@ -631,7 +636,7 @@ begin
       if ((currentKey = lastKeyDown) and IsModifier(currentKey)) or
         (currentKey in [VK_PRINT, VK_SNAPSHOT]) then
       begin
-        SetKeyPress(currentKey, keyService.GetModifierText);
+        SetKeyPress(currentKey, FormMain.keyService.GetModifierText);
 
         //To prevent Windows from passing the keystrokes  to the target window, the Result value must  be a nonzero value.
         Result := 1;
@@ -640,7 +645,7 @@ begin
       if IsModifier(currentKey) then
       begin
         //Removes modifier from list of active modifiers
-        keyService.RemoveModifier(currentKey);
+        FormMain.keyService.RemoveModifier(currentKey);
       end;
     end;
   end;
@@ -721,10 +726,10 @@ end;
 //Adds key to list of keys and writes back to edit field
 procedure SetKeyPress(Key: word; Modifiers: string);
 begin
-  //jm remove? if FormMain.EditMode then
-  begin
+  if (FormTapAndHold <> nil) and (FormTapAndHold.Visible) then
+    FormTapAndHold.SetKeyPress(Key)
+  else
     FormMain.SetModifiedKey(Key, Modifiers, FormMain.memoMacro.Focused);
-  end;
 end;
 
 procedure TFormMain.FormCreate(Sender: TObject);
@@ -1027,16 +1032,16 @@ begin
   self.KeyPreview := true; //traps key presses at form level
   defaultKeyFontName := 'Arial Narrow';
   defaultKeyFontSize := 8;
-  //SetFont(self, 'Helvetica');
+  SetFont(self, 'Helvetica');
   lblMacro1.Left := rgMacro1.Left - lblMacro1.Width - 5;
   lblMacro2.Left := rgMacro2.Left - lblMacro2.Width - 5;
   lblMacro3.Left := rgMacro3.Left - lblMacro3.Width - 5;
-  //lblCoTrigger2.Font.Size := 14;
-  //lblDisplaying.Font.Size := 16;
-  //rgMacro1.Top := 1;
-  //rgMacro2.Top := 1;
-  //rgMacro3.Top := 1;
-  //lblDisplaying.Left := lblMacro1.Left - lblDisplaying2.Width - 5;
+  lblCoTrigger.Font.Size := 14;
+  lblDisplaying.Font.Size := 16;
+  rgMacro1.Top := 1;
+  rgMacro2.Top := 1;
+  rgMacro3.Top := 1;
+  lblDisplaying.Left := lblMacro1.Left - lblDisplaying.Width - 5;
   lblLayer.Top := lblLayer.Top + 2;
   btnHelpIcon.Left := btnClose.Left;
   btnBackspace.Caption := 'Delete';
@@ -1658,13 +1663,16 @@ begin
   remapCount := 0;
   macroCount := 0;
   totalKeystrokes := 0;
+  tapHoldCount := 0;
   for i := 0 to keyService.KBLayers.Count - 1 do
   begin
     aLayer := keyService.KBLayers[i];
     for j := 0 to aLayer.KBKeyList.Count - 1 do
     begin
       aKbKey := aLayer.KBKeyList[j];
-      if (aKbKey.IsModified) then
+      if (aKbKey.TapAndHold) then
+        inc(tapHoldCount)
+      else if (aKbKey.IsModified) then
         inc(remapCount);
 
       if (aKbKey.IsMacro) then
@@ -2199,7 +2207,15 @@ begin
   else if (menuItem = miBtn4Mouse) then
     SetModifiedKey(VK_MOUSE_BTN4, '', false)
   else if (menuItem = miBtn5Mouse) then
-    SetModifiedKey(VK_MOUSE_BTN5, '', false);
+    SetModifiedKey(VK_MOUSE_BTN5, '', false)
+  else if (menuItem = miHyper) then
+    SetModifiedKey(VK_HYPER, '', false)
+  else if (menuItem = miMeh) then
+    SetModifiedKey(VK_MEH, '', false)
+  else if (menuItem = miTapHold) then
+  begin
+    OpenTapAndHold;
+  end;
 
   btnDoneKey.Click;
 end;
@@ -3709,66 +3725,105 @@ begin
 
   if (kbKey <> nil) and (keyButton <> nil) then
   begin
-    if (kbKey.IsModified) and (not kbKey.IsMacro) then
+    keyButton.BorderWidth := 1;
+    keyButton.BorderStyle := bsNone;
+    keyButton.CornerSize := 10;
+    keyButton.Font.Color := clWhite;
+
+    if (kbKey.TapAndHold) then
+    begin
+      keyButton.Caption := kbKey.TapAction.OtherDisplayText + #10 + kbKey.HoldAction.OtherDisplayText;
+      keyButton.Font.Color := blueColor;
+      if (kbKey.TapAction.DisplaySize <> 0) then
+        fontSize := kbKey.TapAction.DisplaySize
+      else if (kbKey.HoldAction.DisplaySize <> 0) then
+        fontSize := kbKey.HoldAction.DisplaySize;
+    end
+    else if (kbKey.IsModified) then
     begin
       keyButton.Caption := kbKey.ModifiedKey.DisplayText;
       fontSize := kbKey.ModifiedKey.DisplaySize;
       fontName := kbKey.ModifiedKey.FontName;
-      keyButton.BorderStyle := bsNone;
       keyButton.Font.Color := blueColor;
-      keyButton.BorderWidth := 1;
-      keyButton.CornerSize := 10;
-    end
-    else if (not kbKey.IsModified) and (kbKey.IsMacro) then
-    begin
-      keyButton.Caption := kbKey.OriginalKey.DisplayText;
-      fontSize := kbKey.OriginalKey.DisplaySize;
-      fontName := kbKey.OriginalKey.FontName;
-      keyButton.BorderColor := blueColor;
-      keyButton.BorderStyle := bsSingle;
-      keyButton.Font.Color := clWhite;
-      if (kbKey.MacroCount > 1) then
-      begin
-        keyButton.BorderWidth := 3;
-        keyButton.CornerSize := 16;
-      end
-      else
-      begin
-        keyButton.BorderWidth := 1;
-        keyButton.CornerSize := 10;
-      end;
-    end
-    else if (kbKey.IsModified) and (kbKey.IsMacro) then
-    begin
-      keyButton.Caption := kbKey.ModifiedKey.DisplayText;
-      fontSize := kbKey.ModifiedKey.DisplaySize;
-      fontName := kbKey.ModifiedKey.FontName;
-      keyButton.BorderColor := blueColor;
-      keyButton.BorderStyle := bsSingle;
-      keyButton.BorderWidth := 1;
-      keyButton.CornerSize := 10;
-      keyButton.Font.Color := blueColor;
-      if (kbKey.MacroCount > 1) then
-      begin
-        keyButton.BorderWidth := 3;
-        keyButton.CornerSize := 16;
-      end
-      else
-      begin
-        keyButton.BorderWidth := 1;
-        keyButton.CornerSize := 10;
-      end;
     end
     else
     begin
       keyButton.Caption := kbKey.OriginalKey.DisplayText;
       fontSize := kbKey.OriginalKey.DisplaySize;
       fontName := kbKey.OriginalKey.FontName;
-      keyButton.BorderStyle := bsNone;
-      keyButton.Font.Color := clWhite;
-      keyButton.BorderWidth := 1;
-      keyButton.CornerSize := 10;
     end;
+
+    if (kbKey.IsMacro) then
+    begin
+      keyButton.BorderColor := blueColor;
+      keyButton.BorderStyle := bsSingle;
+      if (kbKey.MacroCount > 1) then
+      begin
+        keyButton.BorderWidth := 3;
+        keyButton.CornerSize := 16;
+      end;
+    end;
+
+    //if (kbKey.IsModified) and (not kbKey.IsMacro) then
+    //begin
+    //  keyButton.Caption := kbKey.ModifiedKey.DisplayText;
+    //  fontSize := kbKey.ModifiedKey.DisplaySize;
+    //  fontName := kbKey.ModifiedKey.FontName;
+    //  keyButton.BorderStyle := bsNone;
+    //  keyButton.Font.Color := blueColor;
+    //  keyButton.BorderWidth := 1;
+    //  keyButton.CornerSize := 10;
+    //end
+    //else if (not kbKey.IsModified) and (kbKey.IsMacro) then
+    //begin
+    //  keyButton.Caption := kbKey.OriginalKey.DisplayText;
+    //  fontSize := kbKey.OriginalKey.DisplaySize;
+    //  fontName := kbKey.OriginalKey.FontName;
+    //  keyButton.BorderColor := blueColor;
+    //  keyButton.BorderStyle := bsSingle;
+    //  keyButton.Font.Color := clWhite;
+    //  if (kbKey.MacroCount > 1) then
+    //  begin
+    //    keyButton.BorderWidth := 3;
+    //    keyButton.CornerSize := 16;
+    //  end
+    //  else
+    //  begin
+    //    keyButton.BorderWidth := 1;
+    //    keyButton.CornerSize := 10;
+    //  end;
+    //end
+    //else if (kbKey.IsModified) and (kbKey.IsMacro) then
+    //begin
+    //  keyButton.Caption := kbKey.ModifiedKey.DisplayText;
+    //  fontSize := kbKey.ModifiedKey.DisplaySize;
+    //  fontName := kbKey.ModifiedKey.FontName;
+    //  keyButton.BorderColor := blueColor;
+    //  keyButton.BorderStyle := bsSingle;
+    //  keyButton.BorderWidth := 1;
+    //  keyButton.CornerSize := 10;
+    //  keyButton.Font.Color := blueColor;
+    //  if (kbKey.MacroCount > 1) then
+    //  begin
+    //    keyButton.BorderWidth := 3;
+    //    keyButton.CornerSize := 16;
+    //  end
+    //  else
+    //  begin
+    //    keyButton.BorderWidth := 1;
+    //    keyButton.CornerSize := 10;
+    //  end;
+    //end
+    //else
+    //begin
+    //  keyButton.Caption := kbKey.OriginalKey.DisplayText;
+    //  fontSize := kbKey.OriginalKey.DisplaySize;
+    //  fontName := kbKey.OriginalKey.FontName;
+    //  keyButton.BorderStyle := bsNone;
+    //  keyButton.Font.Color := clWhite;
+    //  keyButton.BorderWidth := 1;
+    //  keyButton.CornerSize := 10;
+    //end;
 
     if (keyButton = activeKeyBtn) and not(unselectKey) then
     begin
@@ -3818,6 +3873,38 @@ begin
     end
     else if (container.Controls[i] is TPanel) then
       InitKeyButtons(container.Controls[i] as TPanel);
+  end;
+end;
+
+procedure TFormMain.OpenTapAndHold;
+var
+  customBtns: TCustomButtons;
+begin
+  if (IsKeyLoaded) then
+  begin
+    if (fileService.VersionBiggerEqual(1, 0, 480)) then
+    begin
+      if (activeKbKey.TapAndHold = false) and (tapHoldCount >= MAX_TAP_HOLD) then
+        ShowDialog('Tap and Hold', 'You have reached the maximum number of Tap and Hold actions for this Profile.', mtWarning, [mbOk], DEFAULT_DIAG_HEIGHT)
+      else
+      begin
+        if (ShowTapAndHold(activeKbKey.TapAction, activeKbKey.HoldAction, activeKbKey.TimingDelay, backColor, fontColor)) then
+        begin
+          KeyModified := true;
+          SetSaveState(ssModifed);
+          keyService.SetTapAndHold(activeKbKey, FormTapAndHold.tapAction, FormTapAndHold.holdAction, FormTapAndHold.timingDelay);
+          UpdateKeyButtonKey(activeKbKey, activeKeyBtn);
+          RefreshRemapInfo;
+        end;
+      end;
+    end
+    else
+    begin
+      createCustomButton(customBtns, 'OK', 100, nil, bkOK);
+      //createCustomButton(customBtns, 'Upgrade Firmware', 150, @openFirwareWebsite);
+      ShowDialog('Tap and Hold', 'To utilize Tap and Hold Actions, please download and install the latest firmware.',
+        mtWarning, [], DEFAULT_DIAG_HEIGHT, KINESIS_DARK_GRAY_FS, clWhite, customBtns);
+    end;
   end;
 end;
 
