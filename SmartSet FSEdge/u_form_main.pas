@@ -11,7 +11,7 @@ uses
   ECSlider, HSSpeedButton, RichMemo, u_keys, userdialog, contnrs, u_form_about,
   LazUTF8, u_form_saveas, u_form_load, u_form_timingdelays, u_form_tapandhold
   {$ifdef Win32},Windows{$endif}
-  {$ifdef Darwin}, MacOSAll, CarbonDef, CarbonProc{$endif};
+  {$ifdef Darwin}, MacOSAll{, CarbonDef, CarbonProc}{$endif};
 
 type
 
@@ -1036,12 +1036,12 @@ begin
   lblMacro1.Left := rgMacro1.Left - lblMacro1.Width - 5;
   lblMacro2.Left := rgMacro2.Left - lblMacro2.Width - 5;
   lblMacro3.Left := rgMacro3.Left - lblMacro3.Width - 5;
-  lblCoTrigger.Font.Size := 14;
-  lblDisplaying.Font.Size := 16;
-  rgMacro1.Top := 1;
-  rgMacro2.Top := 1;
-  rgMacro3.Top := 1;
-  lblDisplaying.Left := lblMacro1.Left - lblDisplaying.Width - 5;
+  //lblCoTrigger.Font.Size := 14;
+  //lblDisplaying.Font.Size := 16;
+  //rgMacro1.Top := 1;
+  //rgMacro2.Top := 1;
+  //rgMacro3.Top := 1;
+  //lblDisplaying.Left := lblMacro1.Left - lblDisplaying.Width - 5;
   lblLayer.Top := lblLayer.Top + 2;
   btnHelpIcon.Left := btnClose.Left;
   btnBackspace.Caption := 'Delete';
