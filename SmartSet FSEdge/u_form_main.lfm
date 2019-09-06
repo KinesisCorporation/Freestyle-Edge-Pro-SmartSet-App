@@ -22,7 +22,7 @@ object FormMain: TFormMain
   OnKeyUp = FormKeyUp
   OnPaint = FormPaint
   Position = poScreenCenter
-  LCLVersion = '2.0.4.0'
+  LCLVersion = '2.0.0.4'
   object pnlMain: TPanel
     Left = 2
     Height = 711
@@ -63,7 +63,7 @@ object FormMain: TFormMain
         Position = 8
         ShowSelRange = False
         TabStop = False
-        TabOrder = 7
+        TabOrder = 3
       end
       object shpSettings: TShape
         Left = 1
@@ -73,6 +73,65 @@ object FormMain: TFormMain
         Brush.Color = 2500134
         Pen.Color = 14064158
         Pen.Width = 3
+      end
+      object lblGlobalMacroSpeed: TLabel
+        Left = 3
+        Height = 25
+        Hint = 'Set the default macro playback speed for the keyboard'
+        Top = 236
+        Width = 140
+        Alignment = taCenter
+        AutoSize = False
+        Caption = 'Global Macro Speed'
+        Font.CharSet = ANSI_CHARSET
+        Font.Color = clWhite
+        Font.Height = -13
+        Font.Name = 'Tahoma'
+        Font.Pitch = fpVariable
+        Font.Quality = fqDraft
+        Font.Style = [fsBold]
+        ParentColor = False
+        ParentFont = False
+        ParentShowHint = False
+        ShowHint = True
+      end
+      object slMacroSpeed: TECSlider
+        Left = 6
+        Height = 24
+        Top = 252
+        Width = 135
+        BevelOuter = bvNone
+        DiscreteChange = 1
+        Increment = 1
+        Indent = 0
+        Mode = eimDiscrete
+        Orientation = eooHorizontal
+        Knob.Color = clWhite
+        Knob.Height = 15
+        Knob.TickMarkCount = 2
+        PageSize = 10
+        ParentColor = False
+        Position = 0
+        ProgressColor = 14064162
+        ProgressColor2 = 14064162
+        ProgressMarkSize = 2
+        ProgressMiddlePos = 0
+        RelativeScaleLength = -1
+        Scale.DateTimeFormat = 'hh:nn:ss'
+        Scale.LogarithmBase = 10
+        Scale.Max = 9
+        Scale.Min = 0
+        Scale.TickLength = 5
+        Scale.TickLongValue = 5
+        Scale.TickMiddleValue = 5
+        Scale.TickShortValue = 1
+        Scale.ValueFormat = esvfText
+        Scale.ValueVisible = evvBounds
+        ScaleFontOptions.FontSize = 7
+        ScaleFontOptions.FontStyles = []
+        TabOrder = 1
+        TabStop = False
+        OnChange = slMacroSpeedChange
       end
       object shpLighting: TShape
         Left = 1
@@ -984,27 +1043,6 @@ object FormMain: TFormMain
         ParentColor = False
         ParentFont = False
       end
-      object lblGlobalMacroSpeed: TLabel
-        Left = 3
-        Height = 25
-        Hint = 'Set the default macro playback speed for the keyboard'
-        Top = 236
-        Width = 140
-        Alignment = taCenter
-        AutoSize = False
-        Caption = 'Global Macro Speed'
-        Font.CharSet = ANSI_CHARSET
-        Font.Color = clWhite
-        Font.Height = -13
-        Font.Name = 'Tahoma'
-        Font.Pitch = fpVariable
-        Font.Quality = fqDraft
-        Font.Style = [fsBold]
-        ParentColor = False
-        ParentFont = False
-        ParentShowHint = False
-        ShowHint = True
-      end
       object lblStatusReport: TLabel
         Left = 3
         Height = 24
@@ -1048,57 +1086,6 @@ object FormMain: TFormMain
         ShowHint = True
         WordWrap = True
       end
-      object lblKnobMax: TStaticText
-        Left = 111
-        Height = 13
-        Top = 528
-        Width = 23
-        Alignment = taCenter
-        Caption = 'Max'
-        Font.CharSet = ANSI_CHARSET
-        Font.Color = clWhite
-        Font.Height = -11
-        Font.Name = 'Tahoma'
-        Font.Pitch = fpVariable
-        Font.Quality = fqDraft
-        Font.Style = [fsBold]
-        ParentFont = False
-        TabOrder = 0
-      end
-      object lblPitchBlack: TStaticText
-        Left = 6
-        Height = 13
-        Top = 590
-        Width = 72
-        Alignment = taCenter
-        Caption = 'Pitch Black'
-        Font.CharSet = ANSI_CHARSET
-        Font.Color = clWhite
-        Font.Height = -11
-        Font.Name = 'Tahoma'
-        Font.Pitch = fpVariable
-        Font.Quality = fqDraft
-        Font.Style = [fsBold]
-        ParentFont = False
-        TabOrder = 4
-      end
-      object lblKnobOff: TStaticText
-        Left = 18
-        Height = 13
-        Top = 528
-        Width = 22
-        Alignment = taCenter
-        Caption = 'Off'
-        Font.CharSet = ANSI_CHARSET
-        Font.Color = clWhite
-        Font.Height = -11
-        Font.Name = 'Tahoma'
-        Font.Pitch = fpVariable
-        Font.Quality = fqDraft
-        Font.Style = [fsBold]
-        ParentFont = False
-        TabOrder = 5
-      end
       object ledPB: TuELED
         Left = 20
         Height = 35
@@ -1133,123 +1120,6 @@ object FormMain: TFormMain
         ShowHint = True
         OnClick = ledBreatheClick
       end
-      object lblBreathe: TStaticText
-        Left = 77
-        Height = 13
-        Top = 590
-        Width = 72
-        Alignment = taCenter
-        Caption = 'Breathe'
-        Font.CharSet = ANSI_CHARSET
-        Font.Color = clWhite
-        Font.Height = -11
-        Font.Name = 'Tahoma'
-        Font.Pitch = fpVariable
-        Font.Quality = fqDraft
-        Font.Style = [fsBold]
-        ParentFont = False
-        TabOrder = 6
-      end
-      object lblGlobal0: TStaticText
-        Left = 13
-        Height = 13
-        Hint = 'Disabled'
-        Top = 275
-        Width = 9
-        Alignment = taCenter
-        Caption = '0'
-        Font.CharSet = ANSI_CHARSET
-        Font.Color = clWhite
-        Font.Height = -11
-        Font.Name = 'Tahoma'
-        Font.Pitch = fpVariable
-        Font.Quality = fqDraft
-        Font.Style = [fsBold]
-        ParentFont = False
-        ParentShowHint = False
-        ShowHint = True
-        TabOrder = 8
-      end
-      object lblGlobal17: TStaticText
-        Left = 38
-        Height = 13
-        Hint = '8 actions per second'
-        Top = 275
-        Width = 9
-        Alignment = taCenter
-        Caption = '2'
-        Font.CharSet = ANSI_CHARSET
-        Font.Color = clWhite
-        Font.Height = -11
-        Font.Name = 'Tahoma'
-        Font.Pitch = fpVariable
-        Font.Quality = fqDraft
-        Font.Style = [fsBold]
-        ParentFont = False
-        ParentShowHint = False
-        ShowHint = True
-        TabOrder = 9
-      end
-      object lblGlobal5: TStaticText
-        Left = 63
-        Height = 13
-        Hint = '22 actions per second'
-        Top = 275
-        Width = 9
-        Alignment = taCenter
-        Caption = '4'
-        Font.CharSet = ANSI_CHARSET
-        Font.Color = clWhite
-        Font.Height = -11
-        Font.Name = 'Tahoma'
-        Font.Pitch = fpVariable
-        Font.Quality = fqDraft
-        Font.Style = [fsBold]
-        ParentFont = False
-        ParentShowHint = False
-        ShowHint = True
-        TabOrder = 10
-      end
-      object lblGlobal18: TStaticText
-        Left = 87
-        Height = 13
-        Hint = '62 actions per second'
-        Top = 275
-        Width = 9
-        Alignment = taCenter
-        Caption = '6'
-        Font.CharSet = ANSI_CHARSET
-        Font.Color = clWhite
-        Font.Height = -11
-        Font.Name = 'Tahoma'
-        Font.Pitch = fpVariable
-        Font.Quality = fqDraft
-        Font.Style = [fsBold]
-        ParentFont = False
-        ParentShowHint = False
-        ShowHint = True
-        TabOrder = 11
-      end
-      object lblGlobal9: TStaticText
-        Left = 113
-        Height = 13
-        Hint = '125 actions per second'
-        Top = 275
-        Width = 9
-        Alignment = taCenter
-        Caption = '8'
-        Font.CharSet = ANSI_CHARSET
-        Font.Color = clWhite
-        Font.Height = -11
-        Font.Name = 'Tahoma'
-        Font.Pitch = fpVariable
-        Font.Quality = fqDraft
-        Font.Style = [fsBold]
-        ParentFont = False
-        ParentShowHint = False
-        ShowHint = True
-        TabOrder = 12
-      end
       object tbStatusReport: TTrackBar
         Left = 5
         Height = 25
@@ -1262,95 +1132,7 @@ object FormMain: TFormMain
         ShowSelRange = False
         TabStop = False
         ParentShowHint = False
-        TabOrder = 13
-      end
-      object lblStatus0: TStaticText
-        Left = 13
-        Height = 13
-        Hint = 'Disabled'
-        Top = 330
-        Width = 9
-        Alignment = taCenter
-        Caption = '0'
-        Font.CharSet = ANSI_CHARSET
-        Font.Color = clWhite
-        Font.Height = -11
-        Font.Name = 'Tahoma'
-        Font.Pitch = fpVariable
-        Font.Quality = fqDraft
-        Font.Style = [fsBold]
-        ParentFont = False
-        ParentShowHint = False
-        ShowHint = True
-        TabOrder = 14
-      end
-      object lblStatus1: TStaticText
-        Left = 41
-        Height = 13
-        Top = 330
-        Width = 9
-        Alignment = taCenter
-        Caption = '1'
-        Font.CharSet = ANSI_CHARSET
-        Font.Color = clWhite
-        Font.Height = -11
-        Font.Name = 'Tahoma'
-        Font.Pitch = fpVariable
-        Font.Quality = fqDraft
-        Font.Style = [fsBold]
-        ParentFont = False
-        TabOrder = 15
-      end
-      object lblStatus2: TStaticText
-        Left = 69
-        Height = 13
-        Top = 330
-        Width = 9
-        Alignment = taCenter
-        Caption = '2'
-        Font.CharSet = ANSI_CHARSET
-        Font.Color = clWhite
-        Font.Height = -11
-        Font.Name = 'Tahoma'
-        Font.Pitch = fpVariable
-        Font.Quality = fqDraft
-        Font.Style = [fsBold]
-        ParentFont = False
-        TabOrder = 16
-      end
-      object lblStatus3: TStaticText
-        Left = 97
-        Height = 13
-        Top = 330
-        Width = 9
-        Alignment = taCenter
-        Caption = '3'
-        Font.CharSet = ANSI_CHARSET
-        Font.Color = clWhite
-        Font.Height = -11
-        Font.Name = 'Tahoma'
-        Font.Pitch = fpVariable
-        Font.Quality = fqDraft
-        Font.Style = [fsBold]
-        ParentFont = False
-        TabOrder = 17
-      end
-      object lblStatus4: TStaticText
-        Left = 124
-        Height = 13
-        Top = 330
-        Width = 9
-        Alignment = taCenter
-        Caption = '4'
-        Font.CharSet = ANSI_CHARSET
-        Font.Color = clWhite
-        Font.Height = -11
-        Font.Name = 'Tahoma'
-        Font.Pitch = fpVariable
-        Font.Quality = fqDraft
-        Font.Style = [fsBold]
-        ParentFont = False
-        TabOrder = 18
+        TabOrder = 4
       end
       object swGameMode: TECSwitch
         Left = 65
@@ -1380,47 +1162,9 @@ object FormMain: TFormMain
         SwitchColor = clNone
         SwitchHeight = 25
         SwitchWidth = 70
-        TabOrder = 3
-        TabStop = False
-        OnChange = swGameModeChange
-      end
-      object slMacroSpeed: TECSlider
-        Left = 6
-        Height = 24
-        Top = 252
-        Width = 135
-        BevelOuter = bvNone
-        DiscreteChange = 1
-        Increment = 1
-        Indent = 0
-        Mode = eimDiscrete
-        Orientation = eooHorizontal
-        Knob.Color = clWhite
-        Knob.Height = 15
-        Knob.TickMarkCount = 2
-        PageSize = 10
-        ParentColor = False
-        Position = 0
-        ProgressColor = 14064162
-        ProgressColor2 = 14064162
-        ProgressMarkSize = 2
-        ProgressMiddlePos = 0
-        RelativeScaleLength = -1
-        Scale.DateTimeFormat = 'hh:nn:ss'
-        Scale.LogarithmBase = 10
-        Scale.Max = 9
-        Scale.Min = 0
-        Scale.TickLength = 5
-        Scale.TickLongValue = 5
-        Scale.TickMiddleValue = 5
-        Scale.TickShortValue = 1
-        Scale.ValueFormat = esvfText
-        Scale.ValueVisible = evvBounds
-        ScaleFontOptions.FontSize = 7
-        ScaleFontOptions.FontStyles = []
         TabOrder = 2
         TabStop = False
-        OnChange = slMacroSpeedChange
+        OnChange = swGameModeChange
       end
       object slStatusReport: TECSlider
         Left = 5
@@ -1456,9 +1200,233 @@ object FormMain: TFormMain
         Scale.ValueVisible = evvBounds
         ScaleFontOptions.FontSize = 7
         ScaleFontOptions.FontStyles = []
-        TabOrder = 1
+        TabOrder = 0
         TabStop = False
         OnChange = slStatusReportChange
+      end
+      object lblGlobalSpeed8: TLabel
+        Left = 114
+        Height = 13
+        Top = 279
+        Width = 7
+        Caption = '8'
+        Font.CharSet = ANSI_CHARSET
+        Font.Color = clWhite
+        Font.Height = -11
+        Font.Name = 'Tahoma'
+        Font.Pitch = fpVariable
+        Font.Quality = fqDraft
+        Font.Style = [fsBold]
+        ParentColor = False
+        ParentFont = False
+      end
+      object lblGlobalSpeed6: TLabel
+        Left = 89
+        Height = 13
+        Top = 279
+        Width = 7
+        Caption = '6'
+        Font.CharSet = ANSI_CHARSET
+        Font.Color = clWhite
+        Font.Height = -11
+        Font.Name = 'Tahoma'
+        Font.Pitch = fpVariable
+        Font.Quality = fqDraft
+        Font.Style = [fsBold]
+        ParentColor = False
+        ParentFont = False
+      end
+      object lblGlobalSpeed4: TLabel
+        Left = 63
+        Height = 13
+        Top = 279
+        Width = 7
+        Caption = '4'
+        Font.CharSet = ANSI_CHARSET
+        Font.Color = clWhite
+        Font.Height = -11
+        Font.Name = 'Tahoma'
+        Font.Pitch = fpVariable
+        Font.Quality = fqDraft
+        Font.Style = [fsBold]
+        ParentColor = False
+        ParentFont = False
+      end
+      object lblGlobalSpeed0: TLabel
+        Left = 14
+        Height = 13
+        Top = 279
+        Width = 7
+        Caption = '0'
+        Font.CharSet = ANSI_CHARSET
+        Font.Color = clWhite
+        Font.Height = -11
+        Font.Name = 'Tahoma'
+        Font.Pitch = fpVariable
+        Font.Quality = fqDraft
+        Font.Style = [fsBold]
+        ParentColor = False
+        ParentFont = False
+      end
+      object lblGlobalSpeed2: TLabel
+        Left = 38
+        Height = 13
+        Top = 279
+        Width = 7
+        Caption = '2'
+        Font.CharSet = ANSI_CHARSET
+        Font.Color = clWhite
+        Font.Height = -11
+        Font.Name = 'Tahoma'
+        Font.Pitch = fpVariable
+        Font.Quality = fqDraft
+        Font.Style = [fsBold]
+        ParentColor = False
+        ParentFont = False
+      end
+      object lblStatutReport0: TLabel
+        Left = 14
+        Height = 13
+        Top = 335
+        Width = 7
+        Caption = '0'
+        Font.CharSet = ANSI_CHARSET
+        Font.Color = clWhite
+        Font.Height = -11
+        Font.Name = 'Tahoma'
+        Font.Pitch = fpVariable
+        Font.Quality = fqDraft
+        Font.Style = [fsBold]
+        ParentColor = False
+        ParentFont = False
+      end
+      object lblStatutReport1: TLabel
+        Left = 41
+        Height = 13
+        Top = 335
+        Width = 7
+        Caption = '1'
+        Font.CharSet = ANSI_CHARSET
+        Font.Color = clWhite
+        Font.Height = -11
+        Font.Name = 'Tahoma'
+        Font.Pitch = fpVariable
+        Font.Quality = fqDraft
+        Font.Style = [fsBold]
+        ParentColor = False
+        ParentFont = False
+      end
+      object lblStatutReport2: TLabel
+        Left = 70
+        Height = 13
+        Top = 335
+        Width = 7
+        Caption = '2'
+        Font.CharSet = ANSI_CHARSET
+        Font.Color = clWhite
+        Font.Height = -11
+        Font.Name = 'Tahoma'
+        Font.Pitch = fpVariable
+        Font.Quality = fqDraft
+        Font.Style = [fsBold]
+        ParentColor = False
+        ParentFont = False
+      end
+      object lblStatutReport3: TLabel
+        Left = 98
+        Height = 13
+        Top = 335
+        Width = 7
+        Caption = '3'
+        Font.CharSet = ANSI_CHARSET
+        Font.Color = clWhite
+        Font.Height = -11
+        Font.Name = 'Tahoma'
+        Font.Pitch = fpVariable
+        Font.Quality = fqDraft
+        Font.Style = [fsBold]
+        ParentColor = False
+        ParentFont = False
+      end
+      object lblStatutReport4: TLabel
+        Left = 125
+        Height = 13
+        Top = 335
+        Width = 7
+        Caption = '4'
+        Font.CharSet = ANSI_CHARSET
+        Font.Color = clWhite
+        Font.Height = -11
+        Font.Name = 'Tahoma'
+        Font.Pitch = fpVariable
+        Font.Quality = fqDraft
+        Font.Style = [fsBold]
+        ParentColor = False
+        ParentFont = False
+      end
+      object lblKnobMax: TLabel
+        Left = 111
+        Height = 13
+        Top = 526
+        Width = 24
+        Caption = 'Max'
+        Font.CharSet = ANSI_CHARSET
+        Font.Color = clWhite
+        Font.Height = -11
+        Font.Name = 'Tahoma'
+        Font.Pitch = fpVariable
+        Font.Quality = fqDraft
+        Font.Style = [fsBold]
+        ParentColor = False
+        ParentFont = False
+      end
+      object lblKnobOff: TLabel
+        Left = 19
+        Height = 13
+        Top = 526
+        Width = 16
+        Caption = 'Off'
+        Font.CharSet = ANSI_CHARSET
+        Font.Color = clWhite
+        Font.Height = -11
+        Font.Name = 'Tahoma'
+        Font.Pitch = fpVariable
+        Font.Quality = fqDraft
+        Font.Style = [fsBold]
+        ParentColor = False
+        ParentFont = False
+      end
+      object lblPitchBlack: TLabel
+        Left = 10
+        Height = 13
+        Top = 590
+        Width = 61
+        Caption = 'Pitch Black'
+        Font.CharSet = ANSI_CHARSET
+        Font.Color = clWhite
+        Font.Height = -11
+        Font.Name = 'Tahoma'
+        Font.Pitch = fpVariable
+        Font.Quality = fqDraft
+        Font.Style = [fsBold]
+        ParentColor = False
+        ParentFont = False
+      end
+      object lblBreathe: TLabel
+        Left = 89
+        Height = 13
+        Top = 590
+        Width = 45
+        Caption = 'Breathe'
+        Font.CharSet = ANSI_CHARSET
+        Font.Color = clWhite
+        Font.Height = -11
+        Font.Name = 'Tahoma'
+        Font.Pitch = fpVariable
+        Font.Quality = fqDraft
+        Font.Style = [fsBold]
+        ParentColor = False
+        ParentFont = False
       end
     end
     object pnlTitle: TPanel
@@ -8805,6 +8773,7 @@ object FormMain: TFormMain
             ClientHeight = 196
             ClientWidth = 910
             Font.CharSet = ANSI_CHARSET
+            Font.Color = 14064158
             Font.Height = -11
             Font.Name = 'Tahoma'
             Font.Pitch = fpVariable
@@ -8822,7 +8791,7 @@ object FormMain: TFormMain
               Position = 0
               ShowSelRange = False
               TabStop = False
-              TabOrder = 9
+              TabOrder = 8
             end
             object bRShiftMacro: THSSpeedButton
               Left = 645
@@ -9295,7 +9264,6 @@ object FormMain: TFormMain
               Font.Name = 'Tahoma'
               Font.Style = [fsBold]
               HideSelection = False
-              Lines.Strings = (              )
               OnMouseUp = memoMacroMouseUp
               ParentBidiMode = False
               ParentFont = False
@@ -9456,26 +9424,6 @@ object FormMain: TFormMain
               TabOrder = 6
               Transparent = False
             end
-            object lblPSGlobal: TStaticText
-              Left = 768
-              Height = 13
-              Hint = 'Global'
-              Top = 60
-              Width = 9
-              Alignment = taCenter
-              Caption = 'G'
-              Font.CharSet = ANSI_CHARSET
-              Font.Color = 14064158
-              Font.Height = -11
-              Font.Name = 'Tahoma'
-              Font.Pitch = fpVariable
-              Font.Quality = fqDraft
-              Font.Style = [fsBold]
-              ParentFont = False
-              ParentShowHint = False
-              ShowHint = True
-              TabOrder = 7
-            end
             object tbMultiplay: TTrackBar
               Left = 761
               Height = 25
@@ -9487,254 +9435,7 @@ object FormMain: TFormMain
               Position = 0
               ShowSelRange = False
               TabStop = False
-              TabOrder = 8
-            end
-            object lblPlaybackSpeed: TStaticText
-              Left = 761
-              Height = 17
-              Hint = 'Select a custom playback speed or use the Global setting'
-              Top = 18
-              Width = 137
-              Alignment = taCenter
-              Caption = 'Playback Speed'
-              Font.CharSet = ANSI_CHARSET
-              Font.Color = clWhite
-              Font.Height = -13
-              Font.Name = 'Tahoma'
-              Font.Pitch = fpVariable
-              Font.Quality = fqDraft
-              Font.Style = [fsBold]
-              ParentFont = False
-              ParentShowHint = False
-              ShowHint = True
-              TabOrder = 10
-            end
-            object lblMacroMultiplay: TStaticText
-              Left = 761
-              Height = 17
-              Hint = 'Select a custom multiplay value or have the macro repeat when held'
-              Top = 82
-              Width = 137
-              Alignment = taCenter
-              Caption = 'Macro Multiplay'
-              Font.CharSet = ANSI_CHARSET
-              Font.Color = clWhite
-              Font.Height = -13
-              Font.Name = 'Tahoma'
-              Font.Pitch = fpVariable
-              Font.Quality = fqDraft
-              Font.Style = [fsBold]
-              ParentFont = False
-              ParentShowHint = False
-              ShowHint = True
-              TabOrder = 11
-            end
-            object lblPS2: TStaticText
-              Left = 793
-              Height = 13
-              Hint = '8 actions per second'
-              Top = 60
-              Width = 9
-              Alignment = taCenter
-              Caption = '2'
-              Font.CharSet = ANSI_CHARSET
-              Font.Color = clWhite
-              Font.Height = -11
-              Font.Name = 'Tahoma'
-              Font.Pitch = fpVariable
-              Font.Quality = fqDraft
-              Font.Style = [fsBold]
-              ParentFont = False
-              ParentShowHint = False
-              ShowHint = True
-              TabOrder = 12
-            end
-            object lblPS4: TStaticText
-              Left = 818
-              Height = 13
-              Hint = '22 actions per second'
-              Top = 60
-              Width = 9
-              Alignment = taCenter
-              Caption = '4'
-              Font.CharSet = ANSI_CHARSET
-              Font.Color = clWhite
-              Font.Height = -11
-              Font.Name = 'Tahoma'
-              Font.Pitch = fpVariable
-              Font.Quality = fqDraft
-              Font.Style = [fsBold]
-              ParentFont = False
-              ParentShowHint = False
-              ShowHint = True
-              TabOrder = 13
-            end
-            object lblPS6: TStaticText
-              Left = 844
-              Height = 13
-              Hint = '62 actions per second'
-              Top = 60
-              Width = 9
-              Alignment = taCenter
-              Caption = '6'
-              Font.CharSet = ANSI_CHARSET
-              Font.Color = clWhite
-              Font.Height = -11
-              Font.Name = 'Tahoma'
-              Font.Pitch = fpVariable
-              Font.Quality = fqDraft
-              Font.Style = [fsBold]
-              ParentFont = False
-              ParentShowHint = False
-              ShowHint = True
-              TabOrder = 14
-            end
-            object lblPS8: TStaticText
-              Left = 868
-              Height = 13
-              Hint = '125 actions per second'
-              Top = 60
-              Width = 9
-              Alignment = taCenter
-              Caption = '8'
-              Font.CharSet = ANSI_CHARSET
-              Font.Color = clWhite
-              Font.Height = -11
-              Font.Name = 'Tahoma'
-              Font.Pitch = fpVariable
-              Font.Quality = fqDraft
-              Font.Style = [fsBold]
-              ParentFont = False
-              ParentShowHint = False
-              ShowHint = True
-              TabOrder = 15
-            end
-            object lblMMGlobal: TStaticText
-              Left = 768
-              Height = 13
-              Hint = 'Repeat'
-              Top = 125
-              Width = 9
-              Alignment = taCenter
-              Caption = 'R'
-              Font.CharSet = ANSI_CHARSET
-              Font.Color = 14064158
-              Font.Height = -11
-              Font.Name = 'Tahoma'
-              Font.Pitch = fpVariable
-              Font.Quality = fqDraft
-              Font.Style = [fsBold]
-              ParentFont = False
-              ParentShowHint = False
-              ShowHint = True
-              TabOrder = 16
-            end
-            object lblMM2: TStaticText
-              Left = 793
-              Height = 13
-              Top = 125
-              Width = 9
-              Alignment = taCenter
-              Caption = '2'
-              Font.CharSet = ANSI_CHARSET
-              Font.Color = clWhite
-              Font.Height = -11
-              Font.Name = 'Tahoma'
-              Font.Pitch = fpVariable
-              Font.Quality = fqDraft
-              Font.Style = [fsBold]
-              ParentFont = False
-              TabOrder = 17
-            end
-            object lblMM4: TStaticText
-              Left = 818
-              Height = 13
-              Top = 125
-              Width = 9
-              Alignment = taCenter
-              Caption = '4'
-              Font.CharSet = ANSI_CHARSET
-              Font.Color = clWhite
-              Font.Height = -11
-              Font.Name = 'Tahoma'
-              Font.Pitch = fpVariable
-              Font.Quality = fqDraft
-              Font.Style = [fsBold]
-              ParentFont = False
-              TabOrder = 18
-            end
-            object lblMM6: TStaticText
-              Left = 844
-              Height = 13
-              Top = 125
-              Width = 9
-              Alignment = taCenter
-              Caption = '6'
-              Font.CharSet = ANSI_CHARSET
-              Font.Color = clWhite
-              Font.Height = -11
-              Font.Name = 'Tahoma'
-              Font.Pitch = fpVariable
-              Font.Quality = fqDraft
-              Font.Style = [fsBold]
-              ParentFont = False
-              TabOrder = 19
-            end
-            object lblMM8: TStaticText
-              Left = 868
-              Height = 13
-              Top = 125
-              Width = 9
-              Alignment = taCenter
-              Caption = '8'
-              Font.CharSet = ANSI_CHARSET
-              Font.Color = clWhite
-              Font.Height = -11
-              Font.Name = 'Tahoma'
-              Font.Pitch = fpVariable
-              Font.Quality = fqDraft
-              Font.Style = [fsBold]
-              ParentFont = False
-              TabOrder = 20
-            end
-            object lblCoTrigger2: TStaticText
-              Left = 10
-              Height = 17
-              Hint = 'Select a modifier to act as a macro co-trigger'
-              Top = 132
-              Width = 86
-              Caption = 'Co-Trigger :'
-              Font.CharSet = ANSI_CHARSET
-              Font.Color = clWhite
-              Font.Height = -13
-              Font.Name = 'Tahoma'
-              Font.Pitch = fpVariable
-              Font.Quality = fqDraft
-              Font.Style = [fsBold]
-              ParentFont = False
-              ParentShowHint = False
-              ShowHint = True
-              TabOrder = 21
-              Visible = False
-            end
-            object lblDisplaying2: TStaticText
-              Left = 472
-              Height = 24
-              Top = 7
-              Width = 112
-              Caption = 'Displaying :'
-              Font.CharSet = ANSI_CHARSET
-              Font.Color = clWhite
-              Font.Height = -16
-              Font.Name = 'Tahoma'
-              Font.Pitch = fpVariable
-              Font.Quality = fqDraft
-              Font.Style = [fsBold]
-              ParentFont = False
-              ParentShowHint = False
-              ShowHint = True
-              TabOrder = 22
-              Visible = False
+              TabOrder = 7
             end
             object slPlaybackSpeed: TECSlider
               Left = 762
@@ -9817,7 +9518,7 @@ object FormMain: TFormMain
               Height = 25
               Hint = 'Select a key above and input macro in the box below'
               Top = 3
-              Width = 64
+              Width = 65
               Caption = 'Macro'
               Font.CharSet = ANSI_CHARSET
               Font.Color = clWhite
@@ -9870,6 +9571,208 @@ object FormMain: TFormMain
               ParentShowHint = False
               ShowHint = True
             end
+            object lblPlaybackSpeed8: TLabel
+              Left = 870
+              Height = 13
+              Top = 64
+              Width = 7
+              Caption = '8'
+              Font.CharSet = ANSI_CHARSET
+              Font.Color = clWhite
+              Font.Height = -11
+              Font.Name = 'Tahoma'
+              Font.Pitch = fpVariable
+              Font.Quality = fqDraft
+              Font.Style = [fsBold]
+              ParentColor = False
+              ParentFont = False
+            end
+            object lblPlaybackSpeed6: TLabel
+              Left = 844
+              Height = 13
+              Top = 64
+              Width = 7
+              Caption = '6'
+              Font.CharSet = ANSI_CHARSET
+              Font.Color = clWhite
+              Font.Height = -11
+              Font.Name = 'Tahoma'
+              Font.Pitch = fpVariable
+              Font.Quality = fqDraft
+              Font.Style = [fsBold]
+              ParentColor = False
+              ParentFont = False
+            end
+            object lblPlaybackSpeed4: TLabel
+              Left = 820
+              Height = 13
+              Top = 64
+              Width = 7
+              Caption = '4'
+              Font.CharSet = ANSI_CHARSET
+              Font.Color = clWhite
+              Font.Height = -11
+              Font.Name = 'Tahoma'
+              Font.Pitch = fpVariable
+              Font.Quality = fqDraft
+              Font.Style = [fsBold]
+              ParentColor = False
+              ParentFont = False
+            end
+            object lblPlaybackSpeed2: TLabel
+              Left = 794
+              Height = 13
+              Top = 64
+              Width = 7
+              Caption = '2'
+              Font.CharSet = ANSI_CHARSET
+              Font.Color = clWhite
+              Font.Height = -11
+              Font.Name = 'Tahoma'
+              Font.Pitch = fpVariable
+              Font.Quality = fqDraft
+              Font.Style = [fsBold]
+              ParentColor = False
+              ParentFont = False
+            end
+            object lblPlaybackSpeedG: TLabel
+              Left = 769
+              Height = 13
+              Top = 64
+              Width = 8
+              Caption = 'G'
+              Font.CharSet = ANSI_CHARSET
+              Font.Color = 14064158
+              Font.Height = -11
+              Font.Name = 'Tahoma'
+              Font.Pitch = fpVariable
+              Font.Quality = fqDraft
+              Font.Style = [fsBold]
+              ParentColor = False
+              ParentFont = False
+            end
+            object lblMacroMultiR: TLabel
+              Left = 769
+              Height = 13
+              Top = 128
+              Width = 8
+              Caption = 'G'
+              Font.CharSet = ANSI_CHARSET
+              Font.Color = 14064158
+              Font.Height = -11
+              Font.Name = 'Tahoma'
+              Font.Pitch = fpVariable
+              Font.Quality = fqDraft
+              Font.Style = [fsBold]
+              ParentColor = False
+              ParentFont = False
+            end
+            object lblMacroMulti8: TLabel
+              Left = 870
+              Height = 13
+              Top = 128
+              Width = 7
+              Caption = '8'
+              Font.CharSet = ANSI_CHARSET
+              Font.Color = clWhite
+              Font.Height = -11
+              Font.Name = 'Tahoma'
+              Font.Pitch = fpVariable
+              Font.Quality = fqDraft
+              Font.Style = [fsBold]
+              ParentColor = False
+              ParentFont = False
+            end
+            object lblMacroMulti6: TLabel
+              Left = 844
+              Height = 13
+              Top = 128
+              Width = 7
+              Caption = '6'
+              Font.CharSet = ANSI_CHARSET
+              Font.Color = clWhite
+              Font.Height = -11
+              Font.Name = 'Tahoma'
+              Font.Pitch = fpVariable
+              Font.Quality = fqDraft
+              Font.Style = [fsBold]
+              ParentColor = False
+              ParentFont = False
+            end
+            object lblMacroMultiR4: TLabel
+              Left = 820
+              Height = 13
+              Top = 128
+              Width = 7
+              Caption = '4'
+              Font.CharSet = ANSI_CHARSET
+              Font.Color = clWhite
+              Font.Height = -11
+              Font.Name = 'Tahoma'
+              Font.Pitch = fpVariable
+              Font.Quality = fqDraft
+              Font.Style = [fsBold]
+              ParentColor = False
+              ParentFont = False
+            end
+            object lblMacroMulti2: TLabel
+              Left = 794
+              Height = 13
+              Top = 128
+              Width = 7
+              Caption = '2'
+              Font.CharSet = ANSI_CHARSET
+              Font.Color = clWhite
+              Font.Height = -11
+              Font.Name = 'Tahoma'
+              Font.Pitch = fpVariable
+              Font.Quality = fqDraft
+              Font.Style = [fsBold]
+              ParentColor = False
+              ParentFont = False
+            end
+            object lblPlaybackSpeed: TLabel
+              Left = 763
+              Height = 23
+              Hint = 'Select a custom playback speed or use the Global setting'
+              Top = 18
+              Width = 132
+              Alignment = taCenter
+              AutoSize = False
+              Caption = 'Playback Speed'
+              Font.CharSet = ANSI_CHARSET
+              Font.Color = clWhite
+              Font.Height = -13
+              Font.Name = 'Tahoma'
+              Font.Pitch = fpVariable
+              Font.Quality = fqDraft
+              Font.Style = [fsBold]
+              ParentColor = False
+              ParentFont = False
+              ParentShowHint = False
+              ShowHint = True
+            end
+            object lblMacroMultiplay: TLabel
+              Left = 763
+              Height = 23
+              Hint = 'Select a custom multiplay value or have the macro repeat when held'
+              Top = 83
+              Width = 132
+              Alignment = taCenter
+              AutoSize = False
+              Caption = 'Macro Multiplay'
+              Font.CharSet = ANSI_CHARSET
+              Font.Color = clWhite
+              Font.Height = -13
+              Font.Name = 'Tahoma'
+              Font.Pitch = fpVariable
+              Font.Quality = fqDraft
+              Font.Style = [fsBold]
+              ParentColor = False
+              ParentFont = False
+              ParentShowHint = False
+              ShowHint = True
+            end
           end
           object shpLine: TLineObj
             Left = 5
@@ -9879,26 +9782,6 @@ object FormMain: TFormMain
             Color = 14064158
             LineStyle = psSolid
             LineWidth = 3
-          end
-          object lblMacroInfo2: TStaticText
-            Left = 14
-            Height = 27
-            Hint = 'Select a key above and input macro in the box below'
-            Top = 24
-            Width = 362
-            Caption = 'Macro'
-            Font.CharSet = ANSI_CHARSET
-            Font.Color = clWhite
-            Font.Height = -21
-            Font.Name = 'Tahoma'
-            Font.Pitch = fpVariable
-            Font.Quality = fqDraft
-            Font.Style = [fsBold]
-            ParentFont = False
-            ParentShowHint = False
-            ShowHint = True
-            TabOrder = 1
-            Visible = False
           end
         end
       end
