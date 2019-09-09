@@ -74,7 +74,7 @@ object FormSaveAs: TFormSaveAs
     Hint = 'Assign to position 1-9 for easy access'
     Top = 32
     Width = 56
-    Font.Height = -16
+    Font.Height = -13
     Font.Name = 'Tahoma'
     ItemHeight = 26
     ItemIndex = 0

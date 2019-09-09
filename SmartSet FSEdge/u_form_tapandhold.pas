@@ -24,6 +24,10 @@ type
     lblDelay: TLabel;
     procedure btnCancelClick(Sender: TObject);
     procedure btnDoneClick(Sender: TObject);
+    procedure eHoldActionKeyDown(Sender: TObject; var Key: Word;
+      Shift: TShiftState);
+    procedure eTapActionKeyDown(Sender: TObject; var Key: Word;
+      Shift: TShiftState);
     procedure eTimingDelayChange(Sender: TObject);
     procedure eTimingDelayKeyDown(Sender: TObject; var Key: Word;
       Shift: TShiftState);
@@ -131,6 +135,24 @@ begin
     ModalResult := mrOK;
 end;
 
+procedure TFormTapAndHold.eHoldActionKeyDown(Sender: TObject; var Key: Word;
+  Shift: TShiftState);
+begin
+  {$ifdef Darwin}
+  SetKeyPress(key, eHoldAction);
+  {$endif}
+  key := 0;
+end;
+
+procedure TFormTapAndHold.eTapActionKeyDown(Sender: TObject; var Key: Word;
+  Shift: TShiftState);
+begin
+  {$ifdef Darwin}
+  SetKeyPress(key, eTapAction);
+  {$endif}
+  key := 0;
+end;
+
 procedure TFormTapAndHold.eTimingDelayChange(Sender: TObject);
 begin
   timingDelay := ConvertToInt(FormTapAndHold.eTimingDelay.Text);
@@ -158,7 +180,9 @@ begin
         timingDelay := MIN_TIMING_DELAY;
       FormTapAndHold.eTimingDelay.Text := IntToStr(timingDelay);
     end;
-  end;
+  end
+  else if ((key < VK_0) or (key > VK_9)) and (key <> VK_BACK) then
+   key := 0;
 end;
 
 procedure TFormTapAndHold.SetKeyPress(key: word; edit: TEdit);

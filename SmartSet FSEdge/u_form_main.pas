@@ -481,6 +481,7 @@ type
     function Save(layoutFile: string; isNew: boolean = false; showSaveDialog: boolean = true): boolean;
     procedure SaveAs(isNew: boolean = false);
     procedure LoadLayer(layer: TKBLayer);
+    procedure ShowIntroduction;
     procedure UpdateKeyButtonKey(kbKey: TKBKey; keyButton: TLabelBox; unselectKey: boolean = false);
     function GetKeyButtonByIndex(index: integer): TLabelBox;
     procedure SetModifiedKey(key: word; Modifiers: string; isMacro: boolean; bothLayers: boolean = false);
@@ -666,7 +667,8 @@ begin
   end;
 
   //If entering speed, do nothing
-  if (not FormMain.Active) then
+  //if (not FormMain.Active) then
+  if (not (Screen.ActiveForm.Name = self.Name)) then
     exit;
 
   currentKey := key;
@@ -924,7 +926,7 @@ begin
   begin
     createCustomButton(customBtns, 'Troubleshooting Tips', 175, @openTroubleshootingTipsClick);
     ShowDialog('SmartSet App File Error', 'The SmartSet App cannot find the necessary layout and settings files on the v-drive. Replug the keyboard to regenerate these files and try launching the App again.',
-      mtFSEdge, [], DEFAULT_DIAG_HEIGHT, KINESIS_DARK_GRAY_FS, clWhite, customBtns);
+      mtFSEdge, [], DEFAULT_DIAG_HEIGHT, backColor, fontColor, customBtns);
     Application.Terminate;
   end;
 end;
@@ -971,15 +973,20 @@ begin
 end;
 
 procedure TFormMain.FormActivate(Sender: TObject);
+begin
+  ShowIntroduction;
+end;
+
+procedure TFormMain.ShowIntroduction;
 var
   customBtns: TCustomButtons;
   hideNotif: integer;
 begin
   if (not infoMessageShown) and (not fileService.AppSettings.AppIntroMsg) then
   begin
-    createCustomButton(customBtns, 'Continue', 120, @continueClick);
-    createCustomButton(customBtns, 'Watch Tutorial', 120, @watchTutorialClick);
-    createCustomButton(customBtns, 'Read Manual', 120, @readManualClick);
+    createCustomButton(customBtns, 'Continue', 130, @continueClick);
+    createCustomButton(customBtns, 'Watch Tutorial', 130, @watchTutorialClick);
+    createCustomButton(customBtns, 'Read Manual', 130, @readManualClick);
 
     hideNotif := ShowDialog('Introduction', 'To program, first select a key by clicking on the keyboard image' + #10 +
       '- Remap: Tap the desired key action on the keyboard or use the Special Actions button' + #10 +
@@ -990,8 +997,9 @@ begin
       fileService.SetAppIntroMsg(true);
       fileService.SaveAppSettings;
     end;
+    infoMessageShown := true;
+    self.Activate;
   end;
-  infoMessageShown := true;
 end;
 
 procedure TFormMain.pnlTitleMouseDown(Sender: TObject; Button: TMouseButton;
@@ -1032,16 +1040,10 @@ begin
   self.KeyPreview := true; //traps key presses at form level
   defaultKeyFontName := 'Arial Narrow';
   defaultKeyFontSize := 8;
-  SetFont(self, 'Helvetica');
+  SetFont(self, 'Tahoma Bold');//'Helvetica');
   lblMacro1.Left := rgMacro1.Left - lblMacro1.Width - 5;
   lblMacro2.Left := rgMacro2.Left - lblMacro2.Width - 5;
   lblMacro3.Left := rgMacro3.Left - lblMacro3.Width - 5;
-  //lblCoTrigger.Font.Size := 14;
-  //lblDisplaying.Font.Size := 16;
-  //rgMacro1.Top := 1;
-  //rgMacro2.Top := 1;
-  //rgMacro3.Top := 1;
-  //lblDisplaying.Left := lblMacro1.Left - lblDisplaying.Width - 5;
   lblLayer.Top := lblLayer.Top + 2;
   btnHelpIcon.Left := btnClose.Left;
   btnBackspace.Caption := 'Delete';
@@ -1066,18 +1068,8 @@ begin
   tbSpeed.Visible := false;
 
   //Slider settings
-  //lblPS2.Left := lblPSGlobal.Left + SliderSeparator;
-  //lblPS4.Left := lblPS2.Left + SliderSeparator;
-  //lblPS6.Left := lblPS4.Left + SliderSeparator + 2;
-  //lblPS8.Left := lblPS6.Left + SliderSeparator;
-  //lblMM2.Left := lblMMGlobal.Left + SliderSeparator;
-  //lblMM4.Left := lblMM2.Left + SliderSeparator;
-  //lblMM6.Left := lblMM4.Left + SliderSeparator + 2;
-  //lblMM8.Left := lblMM6.Left + SliderSeparator;
   lblMacroMultiplay.Top := lblMacroMultiplay.Top - 2;
-  //slMacroMultiplay.Top := slMacroMultiplay.Top - 3;
   lblPlaybackSpeed.Top := lblPlaybackSpeed.Top - 2;
-  //slPlaybackSpeed.Top := slPlaybackSpeed.Top - 3;
 
   lblGlobalMacroSpeed.Top := lblGlobalMacroSpeed.Top - 3;
   slMacroSpeed.Top := slMacroSpeed.Top - 3;
@@ -2208,10 +2200,23 @@ begin
     SetModifiedKey(VK_MOUSE_BTN4, '', false)
   else if (menuItem = miBtn5Mouse) then
     SetModifiedKey(VK_MOUSE_BTN5, '', false)
-  else if (menuItem = miHyper) then
-    SetModifiedKey(VK_HYPER, '', false)
-  else if (menuItem = miMeh) then
-    SetModifiedKey(VK_MEH, '', false)
+  else if (menuItem = miHyper) or (menuItem = miMeh) then
+  begin
+    if (fileService.VersionBiggerEqual(1, 0, 480)) then
+    begin
+      if (menuItem = miHyper) then
+        SetModifiedKey(VK_HYPER, '', false)
+      else if (menuItem = miHyper) then
+        SetModifiedKey(VK_MEH, '', false);
+    end
+    else
+    begin
+      createCustomButton(customBtns, 'OK', 150, nil, bkOK);
+      createCustomButton(customBtns, 'Update Firmware', 150, @openFirwareWebsite);
+      ShowDialog('Multimodifiers', 'To utilize Multimodifiers, please download and install the latest firmware.',
+        mtWarning, [], DEFAULT_DIAG_HEIGHT, backColor, fontColor, customBtns);
+    end;
+  end
   else if (menuItem = miTapHold) then
   begin
     OpenTapAndHold;
@@ -2504,16 +2509,20 @@ begin
 end;
 
 procedure TFormMain.readManualClick(Sender: TObject);
-var
-  filePath: string;
+//var
+//  filePath: string;
 begin
-  filePath := GApplicationPath + '\help\' + USER_MANUAL_FSEDGE;
-  {$ifdef Darwin}filePath := GApplicationPath + '/help/' + USER_MANUAL_FSEDGE;{$endif}
-
-  if FileExists(filePath) then
-    OpenDocument(filePath)
+  if (GApplication = APPL_FSPRO) then
+    OpenUrl(FSPRO_MANUAL)
   else
-    ShowDialog('Help file', 'Help file not found!', mtError, [mbOK], DEFAULT_DIAG_HEIGHT, backColor, fontColor);
+    OpenUrl(FSEDGE_MANUAL);
+//  filePath := GApplicationPath + '\help\' + USER_MANUAL_FSEDGE;
+//  {$ifdef Darwin}filePath := GApplicationPath + '/help/' + USER_MANUAL_FSEDGE;{$endif}
+
+//  if FileExists(filePath) then
+//    OpenDocument(filePath)
+//  else
+//    ShowDialog('Help file', 'Help file not found!', mtError, [mbOK], DEFAULT_DIAG_HEIGHT, backColor, fontColor);
 end;
 
 procedure TFormMain.openTroubleshootingTipsClick(Sender: TObject);
@@ -2524,9 +2533,9 @@ end;
 procedure TFormMain.openFirwareWebsite(Sender: TObject);
 begin
   if (GApplication = APPL_FSPRO) then
-    OpenUrl('https://kinesis-ergo.com/support/freestyle-pro/')
+    OpenUrl('https://kinesis-ergo.com/support/freestyle-pro/#firmware-updates')
   else
-    OpenUrl('https://gaming.kinesis-ergo.com/fs-edge-support');
+    OpenUrl('https://gaming.kinesis-ergo.com/fs-edge-support/#firmware');
 end;
 
 procedure TFormMain.createCustomButton(var customBtns: TCustomButtons;
@@ -3879,13 +3888,36 @@ end;
 procedure TFormMain.OpenTapAndHold;
 var
   customBtns: TCustomButtons;
+  otherLayer: TKBLayer;
+  keyOtherLayer: TKBKey;
 begin
   if (IsKeyLoaded) then
   begin
     if (fileService.VersionBiggerEqual(1, 0, 480)) then
     begin
-      if (activeKbKey.TapAndHold = false) and (tapHoldCount >= MAX_TAP_HOLD) then
-        ShowDialog('Tap and Hold', 'You have reached the maximum number of Tap and Hold actions for this Profile.', mtWarning, [mbOk], DEFAULT_DIAG_HEIGHT)
+      //Check key other layer
+      if (activeLayer.LayerIndex = TOPLAYER_IDX) then
+        otherLayer := keyService.GetLayer(BOTLAYER_IDX)
+      else
+        otherLayer := keyService.GetLayer(TOPLAYER_IDX);
+      keyOtherLayer := keyService.GetKbKeyByIndex(otherLayer, activeKbKey.Index);
+
+      if (keyOtherLayer <> nil) and (keyOtherLayer.TapAndHold) then
+        ShowDialog('Tap and Hold', 'You cannot assign a Tap and Hold Action to the same key in both layers.', mtWarning, [mbOk], DEFAULT_DIAG_HEIGHT, backColor, fontColor)
+      else if (activeKbKey.TapAndHold = false) and (tapHoldCount >= MAX_TAP_HOLD) then
+        ShowDialog('Tap and Hold', 'You have reached the maximum number of Tap and Hold actions for this Profile.', mtWarning, [mbOk], DEFAULT_DIAG_HEIGHT, backColor, fontColor)
+      else if (activeKbKey.IsMacro) then
+      begin
+        ShowDialog('Tap and Hold', 'You cannot assign a Tap and Hold Action to a macro trigger key.',
+          mtWarning, [mbOk], DEFAULT_DIAG_HEIGHT, backColor, fontColor);
+      end
+      else if (activeLayer.LayerIndex = TOPLAYER_IDX) and
+        (((activeKbKey.OriginalKey.Key >= VK_A) and (activeKbKey.OriginalKey.Key <= VK_Z)) or
+        ((activeKbKey.OriginalKey.Key >= VK_0) and (activeKbKey.OriginalKey.Key <= VK_9))) then
+      begin
+        ShowDialog('Tap and Hold', 'You cannot assign a Tap and Hold Action to these keys (A-Z, 0-9) on the Top Layer.',
+          mtWarning, [mbOk], DEFAULT_DIAG_HEIGHT, backColor, fontColor);
+      end
       else
       begin
         if (ShowTapAndHold(activeKbKey.TapAction, activeKbKey.HoldAction, activeKbKey.TimingDelay, backColor, fontColor)) then
@@ -3900,10 +3932,10 @@ begin
     end
     else
     begin
-      createCustomButton(customBtns, 'OK', 100, nil, bkOK);
-      //createCustomButton(customBtns, 'Upgrade Firmware', 150, @openFirwareWebsite);
+      createCustomButton(customBtns, 'OK', 150, nil, bkOK);
+      createCustomButton(customBtns, 'Update Firmware', 150, @openFirwareWebsite);
       ShowDialog('Tap and Hold', 'To utilize Tap and Hold Actions, please download and install the latest firmware.',
-        mtWarning, [], DEFAULT_DIAG_HEIGHT, KINESIS_DARK_GRAY_FS, clWhite, customBtns);
+        mtWarning, [], DEFAULT_DIAG_HEIGHT, backColor, fontColor, customBtns);
     end;
   end;
 end;

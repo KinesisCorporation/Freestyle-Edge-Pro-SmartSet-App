@@ -1,7 +1,7 @@
 object FormMain: TFormMain
-  Left = 270
+  Left = 269
   Height = 715
-  Top = 102
+  Top = 101
   Width = 1098
   BorderIcons = [biSystemMenu, biMinimize, biMaximize, biHelp]
   BorderWidth = 2
@@ -9658,7 +9658,7 @@ object FormMain: TFormMain
               Height = 13
               Top = 128
               Width = 8
-              Caption = 'G'
+              Caption = 'R'
               Font.CharSet = ANSI_CHARSET
               Font.Color = 14064158
               Font.Height = -11

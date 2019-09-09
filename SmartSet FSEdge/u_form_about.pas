@@ -140,16 +140,20 @@ begin
 end;
 
 procedure TFormAbout.OpenHelpFile;
-var
-  filePath: string;
+//var
+//  filePath: string;
 begin
-  filePath := GApplicationPath + '\help\' + USER_MANUAL_FSEDGE;
-  {$ifdef Darwin}filePath := GApplicationPath + '/help/' + USER_MANUAL_FSEDGE;{$endif}
-
-  if FileExists(filePath) then
-    OpenDocument(filePath)
+  if (GApplication = APPL_FSPRO) then
+    OpenUrl(FSPRO_MANUAL)
   else
-    ShowDialog('Help file', 'Help file not found!', mtError, [mbOK], DEFAULT_DIAG_HEIGHT, KINESIS_DARK_GRAY_FS, clWhite);
+    OpenUrl(FSEDGE_MANUAL);
+//  filePath := GApplicationPath + '\help\' + USER_MANUAL_FSEDGE;
+//  {$ifdef Darwin}filePath := GApplicationPath + '/help/' + USER_MANUAL_FSEDGE;{$endif}
+
+//  if FileExists(filePath) then
+//    OpenDocument(filePath)
+//  else
+//    ShowDialog('Help file', 'Help file not found!', mtError, [mbOK], DEFAULT_DIAG_HEIGHT, KINESIS_DARK_GRAY_FS, clWhite);
 end;
 
 end.
