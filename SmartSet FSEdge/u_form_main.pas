@@ -668,8 +668,8 @@ begin
 
   //If entering speed, do nothing
   //if (not FormMain.Active) then
-  if (not (Screen.ActiveForm.Name = self.Name)) then
-    exit;
+//  if (not (Screen.ActiveForm.Name = self.Name)) then
+//    exit;
 
   currentKey := key;
 
@@ -997,9 +997,10 @@ begin
       fileService.SetAppIntroMsg(true);
       fileService.SaveAppSettings;
     end;
-    infoMessageShown := true;
-    self.Activate;
   end;
+  if (self.Visible) and (not infoMessageShown) then
+     pnlKb.SetFocus;
+  infoMessageShown := true;
 end;
 
 procedure TFormMain.pnlTitleMouseDown(Sender: TObject; Button: TMouseButton;

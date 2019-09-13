@@ -1,7 +1,7 @@
 object FormMain: TFormMain
-  Left = 269
+  Left = 469
   Height = 715
-  Top = 101
+  Top = 110
   Width = 1098
   BorderIcons = [biSystemMenu, biMinimize, biMaximize, biHelp]
   BorderWidth = 2
@@ -8792,7 +8792,7 @@ object FormMain: TFormMain
               Position = 0
               ShowSelRange = False
               TabStop = False
-              TabOrder = 8
+              TabOrder = 7
             end
             object bRShiftMacro: THSSpeedButton
               Left = 645
@@ -9272,7 +9272,7 @@ object FormMain: TFormMain
               ParentShowHint = False
               ScrollBars = ssVertical
               ShowHint = True
-              TabOrder = 0
+              TabOrder = 8
               TabStop = False
               WantReturns = False
               ZoomFactor = 1
@@ -9295,7 +9295,7 @@ object FormMain: TFormMain
               ParentFont = False
               ParentShowHint = False
               ShowHint = True
-              TabOrder = 1
+              TabOrder = 0
             end
             object rgMacro2: TRadioButton
               Left = 650
@@ -9315,7 +9315,7 @@ object FormMain: TFormMain
               ParentFont = False
               ParentShowHint = False
               ShowHint = True
-              TabOrder = 4
+              TabOrder = 3
             end
             object rgMacro3: TRadioButton
               Left = 707
@@ -9335,7 +9335,7 @@ object FormMain: TFormMain
               ParentFont = False
               ParentShowHint = False
               ShowHint = True
-              TabOrder = 5
+              TabOrder = 4
             end
             object lblMacro1: TLabel
               Cursor = crHandPoint
@@ -9423,7 +9423,7 @@ object FormMain: TFormMain
               OnClick = textMacroInputClick
               ParentFont = False
               ParentColor = False
-              TabOrder = 6
+              TabOrder = 5
               Transparent = False
             end
             object tbMultiplay: TTrackBar
@@ -9437,7 +9437,7 @@ object FormMain: TFormMain
               Position = 0
               ShowSelRange = False
               TabStop = False
-              TabOrder = 7
+              TabOrder = 6
             end
             object slPlaybackSpeed: TECSlider
               Left = 762
@@ -9473,7 +9473,7 @@ object FormMain: TFormMain
               Scale.ValueVisible = evvBounds
               ScaleFontOptions.FontSize = 7
               ScaleFontOptions.FontStyles = []
-              TabOrder = 3
+              TabOrder = 2
               TabStop = False
               OnChange = slPlaybackSpeedChange
             end
@@ -9511,7 +9511,7 @@ object FormMain: TFormMain
               Scale.ValueVisible = evvBounds
               ScaleFontOptions.FontSize = 7
               ScaleFontOptions.FontStyles = []
-              TabOrder = 2
+              TabOrder = 1
               TabStop = False
               OnChange = slMacroMultiplayChange
             end
