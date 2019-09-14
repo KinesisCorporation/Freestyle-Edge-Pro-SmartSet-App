@@ -2207,7 +2207,7 @@ begin
     begin
       if (menuItem = miHyper) then
         SetModifiedKey(VK_HYPER, '', false)
-      else if (menuItem = miHyper) then
+      else if (menuItem = miMeh) then
         SetModifiedKey(VK_MEH, '', false);
     end
     else
