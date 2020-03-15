@@ -8,8 +8,7 @@ interface
 
 uses
   {$ifdef Win32}Windows, {$endif}
-  {$ifdef Darwin}LCLIntf, {$endif}
-  lcltype, Classes, SysUtils, FileUtil, Controls, Graphics, character, LazUTF8, U_Keys, Buttons,
+  LCLIntf, lcltype, Classes, SysUtils, FileUtil, Controls, Graphics, character, LazUTF8, U_Keys, Buttons,
   HSSpeedButton;
 
 type
